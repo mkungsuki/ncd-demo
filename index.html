@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NCD Board — รพ.ชุมแพ (เฟสสาธิต)</title>
+<style>
+  :root{
+    --red:#c62828; --red-bg:#fdecec; --yellow:#a07800; --yellow-bg:#fdf6e3; --green:#2e7d32; --green-bg:#eef7ee;
+    --blue:#1565c0; --purple:#6a4fa3;
+    --bg:#f2f4f7; --card:#fff; --line:#dde3ea; --ink:#1f2a36; --dim:#647383;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',Tahoma,'Leelawadee UI',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+  /* ── top bars ── */
+  .appbar{display:flex;align-items:center;gap:12px;background:#153a5b;color:#fff;padding:8px 16px}
+  .appbar b{font-size:16px}
+  .appbar .meta{font-size:11.5px;opacity:.85;font-weight:400}
+  .warnbar{background:#fff7df;border-bottom:1px solid #e3cf8a;color:#6b5200;padding:4px 16px;font-size:12.5px;font-weight:600}
+  .degbar{background:var(--red);color:#fff;padding:6px 16px;font-weight:700;display:none;font-size:13.5px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 16px;background:#fff;border-bottom:1px solid var(--line);font-size:13px}
+  .toolbar label{color:var(--dim)}
+  .toolbar select,.toolbar input,button{font:inherit;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:#fff}
+  button{cursor:pointer}
+  button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  /* ── tabs ── */
+  .tabs{display:flex;gap:4px;padding:8px 16px 0;background:#fff;border-bottom:2px solid var(--line);flex-wrap:wrap}
+  .tab{padding:9px 18px;cursor:pointer;border-radius:9px 9px 0 0;font-weight:700;color:var(--dim);font-size:14.5px}
+  .tab.active{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-bottom:2px solid var(--bg);margin-bottom:-2px}
+  .tab-sep{width:1px;background:var(--line);margin:6px 6px}
+  .page{padding:14px 16px 30px;display:none;max-width:1200px}
+  .page.active{display:block}
+  /* ── summary strip ── */
+  .sumstrip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .sum{background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 14px;font-size:13px}
+  .sum b{font-size:19px;display:block;line-height:1.1}
+  .sum.r b{color:var(--red)} .sum.y b{color:var(--yellow)} .sum.g b{color:var(--green)} .sum.b b{color:var(--blue)}
+  .hint{color:var(--dim);font-size:12.5px;margin:0 0 12px}
+  /* ── case rows/cards ── */
+  details.case{background:var(--card);border:1px solid var(--line);border-left:6px solid #b0bec5;border-radius:10px;margin-bottom:8px}
+  details.case.RED{border-left-color:var(--red)} details.case.YELLOW{border-left-color:#d4af37} details.case.GREEN{border-left-color:var(--green)}
+  details.case>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 14px;flex-wrap:wrap}
+  details.case>summary::-webkit-details-marker{display:none}
+  details.case>summary .arrow{margin-left:auto;color:var(--dim);transition:transform .15s}
+  details.case[open]>summary .arrow{transform:rotate(90deg)}
+  .who b{font-size:15.5px} .who .nm{color:var(--dim);font-size:13px}
+  .body{padding:2px 14px 12px;border-top:1px dashed var(--line)}
+  .chip{display:inline-block;padding:2px 11px;border-radius:999px;font-weight:700;font-size:12.5px;color:#fff}
+  .chip.RED{background:var(--red)} .chip.YELLOW{background:#c9a300;color:#3d3000} .chip.GREEN{background:var(--green)} .chip.GRAY{background:#78909c}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;border:1.5px solid}
+  .badge.task{color:var(--blue);border-color:#b7d0ec;background:#f2f7fd}
+  .badge.ask{color:var(--purple);border-color:#d4c8ea;background:#f7f4fc}
+  .badge.pre{color:#b3541e;border-color:#ecc9b2;background:#fdf4ee}
+  .badge.md{color:var(--red);border-color:#eec3c3;background:var(--red-bg)}
+  .badge.sch{color:var(--purple);border-color:#d4c8ea;background:#f7f4fc}
+  .badge.msr{color:var(--blue);border-color:#b7d0ec;background:#f2f7fd}
+  .badge.ok{color:var(--green);border-color:#bcd9bf;background:var(--green-bg)}
+  .badge.wait{color:#666;border-color:#ccc;background:#f6f6f6}
+  .redline{background:var(--red-bg);border:1.5px solid var(--red);border-radius:8px;padding:6px 12px;margin:8px 0 2px;font-weight:700;color:var(--red);font-size:14px}
+  .dxc{font-size:11px;font-weight:700;border-radius:5px;padding:1px 6px;background:#e8edf3;color:#41566b}
+  /* ── field chips ── */
+  .fchip{display:inline-block;border:1px solid var(--line);border-radius:7px;padding:2px 9px;margin:2px 3px 0 0;font-size:12.5px;background:#fafbfc;font-variant-numeric:tabular-nums}
+  .fchip.bad{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+  .fchip.warn{border-color:#d4af37;color:#7a5c00;background:var(--yellow-bg)}
+  .fchip.ok{border-color:#c6e0c9;background:var(--green-bg)}
+  /* ── checklist ── */
+  .cklist{margin:4px 0}
+  .ck{display:flex;gap:8px;align-items:baseline;padding:3px 0;font-size:14px}
+  .ck .box{font-size:15px}
+  .ck.done{color:var(--dim)}
+  details.q{display:block;margin:2px 0}
+  details.q>summary{list-style:none;cursor:pointer;display:flex;gap:8px;align-items:baseline;padding:3px 0;font-size:14px}
+  details.q>summary::-webkit-details-marker{display:none}
+  details.q>summary .exp{color:var(--dim);font-size:11px}
+  details.q .full{margin:2px 0 6px 26px;font-size:13px;color:#41566b;background:#f7f9fb;border-left:3px solid var(--line);padding:6px 10px;border-radius:0 7px 7px 0}
+  .star{color:#b3541e;font-weight:900}
+  /* ── advisor / meds ── */
+  .adv{border:1.5px solid #b7d0ec;background:#f2f7fd;border-radius:9px;padding:8px 12px;margin:8px 0;font-size:13.5px}
+  .adv.na{border-color:#ddd;background:#f7f7f7;color:#555}
+  .adv .ttl{font-weight:700;color:var(--blue);font-size:12.5px}
+  .meds{font-size:13px;color:#41566b;background:#f7f9fb;border-radius:7px;padding:5px 10px;margin:6px 0;display:inline-block}
+  .sketchbtn{opacity:.55;pointer-events:none;position:relative}
+  .sketchtag{font-size:10.5px;color:#a35;border:1px dashed #a35;border-radius:5px;padding:0 5px;margin-left:6px;vertical-align:middle}
+  /* ── tables (ระบบ) ── */
+  table{border-collapse:collapse;width:100%;background:#fff;font-size:13px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#eef1f4;font-size:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+  .dim{color:var(--dim)} .small{font-size:12.5px}
+  .sketch{border:2px dashed #b0bec5;border-radius:10px;padding:14px;color:var(--dim);background:repeating-linear-gradient(45deg,#fff,#fff 12px,#f4f6f8 12px,#f4f6f8 24px)}
+  .ok-inv{color:var(--green);font-weight:700} .bad-inv{color:var(--red);font-weight:700}
+  .reason{margin:3px 0}
+  .src{font-size:11px;color:var(--dim)}
+  #pasteDlg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50}
+  #pasteDlg .inner{background:#fff;max-width:720px;margin:60px auto;padding:16px;border-radius:10px}
+  textarea{width:100%;height:200px;font-family:Consolas,monospace;font-size:12px}
+  @media print{ body *{visibility:hidden} #printSheet,#printSheet *{visibility:visible} #printSheet{position:absolute;top:0;left:0;width:100%} }
+  footer{padding:10px 16px;color:var(--dim);font-size:12px}
+  .runout{font-weight:800;font-variant-numeric:tabular-nums}
+  .runout.crit{color:var(--red)} .runout.soon{color:#a07800}
+  .arrv{font-size:12.5px;color:var(--dim);font-variant-numeric:tabular-nums;min-width:58px}
+  /* ตัวสลับชุดกฎเป็นเครื่องมือระบบ — โผล่เฉพาะแท็บ IT/Degraded/Admin ไม่กวนหน้าคลินิก */
+  #rulesetWrap{display:none;gap:8px;align-items:center}
+  body.sysview #rulesetWrap{display:inline-flex}
+  .advstep{font-weight:700;font-variant-numeric:tabular-nums}
+  .advblock{color:var(--red);font-size:12.5px;margin-top:3px}
+  .advwarn{color:#b3541e;font-size:12.5px;margin-top:3px}
+  /* ── มุมมองตารางแน่น: แถวเดียวจัดคอลัมน์ตรงกันทุกเคส ให้ตาไล่แนวตั้งได้ ── */
+  .page.tbl details.case{border-radius:0;margin-bottom:2px}
+  .page.tbl details.case:nth-of-type(even){background:#f7f9fc}
+  .page.tbl details.case>summary{display:grid;gap:8px;padding:3px 10px;align-items:center}
+  .page.tbl details.case>summary>*{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .page.tbl .cellB,.page.tbl .cellFlags{display:flex;gap:4px;overflow:hidden}
+  #pgNurse.tbl details.case>summary{grid-template-columns:62px minmax(150px,1fr) 66px minmax(220px,1.4fr) 16px}
+  #pgDoc.tbl   details.case>summary{grid-template-columns:62px 58px minmax(140px,.9fr) 66px minmax(240px,1.6fr) 16px}
+  #pgPharm.tbl details.case>summary{grid-template-columns:22px 96px minmax(130px,.8fr) 130px minmax(320px,1.8fr) 16px}
+  .page.tbl .phctl{margin-left:0;flex-wrap:nowrap}
+  .phctl{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12.5px;flex-wrap:wrap}
+  .phctl select,.phctl input,.phctl button{padding:2px 8px;font-size:12.5px}
+  .pinbtn{border:none;background:none;font-size:16px;padding:0 2px;color:#b0bec5}
+  .pinbtn.on{color:#e6a817}
+  /* หน้าย่อยเภสัช */
+  .subtabs{display:flex;gap:6px;margin-bottom:12px}
+  .subtabs button{padding:6px 16px;border-radius:8px;font-weight:700;color:var(--dim)}
+  .subtabs button.on{background:#153a5b;border-color:#153a5b;color:#fff}
+  /* กระดานวางแผน */
+  .plancols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:start}
+  .plancol{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .planhead{display:flex;align-items:center;gap:6px;font-weight:800;font-size:15px;padding:4px 4px 8px;border-bottom:2px solid var(--line);margin-bottom:6px}
+  .planrow{display:flex;align-items:center;gap:8px;padding:5px 8px;border-left:5px solid #cfd8dc;border-radius:4px;margin:3px 0;background:#fafbfc;font-size:14px}
+  .planrow.soon{border-left-color:#d4af37;background:var(--yellow-bg)}
+  .planrow.crit{border-left-color:var(--red);background:var(--red-bg)}
+  .planrow.crit .pdays{color:var(--red)}
+  .planrow.done{opacity:.45;text-decoration:line-through}
+  .pdays{font-weight:800;min-width:52px;font-variant-numeric:tabular-nums}
+  .pwho{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+  .pmark{margin-left:auto}
+  .planrow{cursor:pointer}
+  .planrow:hover{outline:1.5px solid var(--blue)}
+  details.case.flash{outline:3px solid var(--blue);box-shadow:0 0 0 5px rgba(21,101,192,.2)}
+  tr.flash td{background:#dceafc !important}
+  .pocform{margin-top:10px;padding:8px 10px;background:#f7f9fb;border:1px dashed #b7c6d6;border-radius:8px;font-size:13px}
+  .pocform label{margin-right:6px;color:#41566b}
+  .pocform input.poc{width:74px;padding:3px 6px}
+  .pocdone{margin-top:6px;color:var(--blue);font-size:13px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="appbar"><b>NCD Board · รพ.ชุมแพ</b><span class="meta">เฟสสาธิต · อ่านอย่างเดียว · เฟส 1 ใน รพ.ชุมแพ เท่านั้น (D11) · build <span id="buildInfo"></span></span></div>
+<div class="warnbar" id="warnbar"></div>
+<div class="degbar" id="degbar"></div>
+
+<div class="toolbar">
+  <span id="rulesetWrap"><label>ชุดกฎ:</label>
+  <select id="rulesetSel">
+    <option value="EXAMPLE">ชุดกฎตัวอย่าง (ตัวเลขไม่ใช่เกณฑ์จริง)</option>
+    <option value="REAL">กฎจริง (ยัง draft — ปิดทุกกฎ)</option>
+  </select></span>
+  <label>วันอ้างอิง:</label>
+  <input type="date" id="refDate">
+  <label>มุมมอง:</label>
+  <select id="layoutSel"><option value="card">🃏 การ์ด</option><option value="tbl">☰ ตารางแน่น</option></select>
+  <input id="searchBox" type="search" placeholder="🔍 HN / ชื่อ" style="width:150px">
+  <button id="btnClearSearch" style="display:none">✕</button>
+  <span style="border-left:1px solid var(--line);height:20px"></span>
+  <button id="btnSample">ข้อมูลตัวอย่าง</button>
+  <button id="btnFile">เปิดไฟล์ CSV…</button>
+  <button id="btnPaste">วางจาก Excel…</button>
+  <input type="file" id="fileInput" accept=".csv,.txt" style="display:none">
+  <span class="dim" id="srcLabel"></span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-page="pgNurse">🩸 พยาบาล · วันเจาะ</div>
+  <div class="tab" data-page="pgDoc">🩺 แพทย์ · คิวรีวิว</div>
+  <div class="tab" data-page="pgPharm">💊 เภสัช · ห้องยา</div>
+  <div class="tab-sep"></div>
+  <div class="tab" data-page="pgIT">🔍 IT trace</div>
+  <div class="tab" data-page="pgDeg">⚡ Degraded</div>
+  <div class="tab" data-page="pgAdmin">⚙️ กฎ/Admin</div>
+</div>
+
+<div class="page active" id="pgNurse"></div>
+<div class="page" id="pgDoc"></div>
+<div class="page" id="pgPharm"></div>
+<div class="page" id="pgIT"></div>
+<div class="page" id="pgDeg"></div>
+<div class="page" id="pgAdmin"></div>
+
+<div id="pasteDlg"><div class="inner">
+  <h3>วางข้อมูลจาก Excel (คัดลอกช่วงตารางรวมหัวคอลัมน์ แล้ววางที่นี่)</h3>
+  <p class="dim small">หัวคอลัมน์ต้องตรง field catalog (hn, fbs, fbs_date, bp_sys …) — ดูรายชื่อในแท็บ IT trace · ทางเข้านี้ผ่าน validation เดียวกับ connector ไม่ใช่ทางลัด</p>
+  <textarea id="pasteBox" placeholder="hn	full_name	dx_dm	..."></textarea>
+  <div style="margin-top:8px;text-align:right">
+    <button onclick="document.getElementById('pasteDlg').style.display='none'">ยกเลิก</button>
+    <button class="primary" id="btnPasteOk">นำเข้า</button>
+  </div>
+</div></div>
+
+<div id="printSheet"></div>
+
+<footer>โปรแกรมนี้เป็น "ตัวแปลกฎ" — ไม่มีค่าตัดคลินิกในโค้ด ทุกเกณฑ์มาจากไฟล์กฎ (rules as data) · ห้ามใช้กับผู้ป่วยจริง · เอกสาร: docs/program_design.md</footer>
+
+<script>
+/* ══ ข้อมูลที่ build script ฝังมา (แหล่งจริงคือไฟล์ YAML/CSV — ห้ามแก้ในนี้) ══ */
+const RULES_REAL  = {"meta": {"source_document": "CPG.pdf — รพ.ชุมแพ ปรับปรุง 12 กรกฎาคม 2568", "extracted_at": "2026-07-24", "status": "DRAFT_PENDING_MED_LEAD_SIGNOFF", "approval_status": "draft", "approved_by": null, "approved_at": null}, "rules": [{"id": "red_a1c_9", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_cr_15", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 3 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_egfr_60", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_uacr_300", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_comorbid_ihd_mi", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_stroke_unstable", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_lab_critical", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_max_dose_uncontrolled", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 5 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_dka_hhs_suspect", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_dtx_400", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_hypoglycemia", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_bp_180_110", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_resistant_ht", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 3 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_ht_young", "family": "routing", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_rhabdomyolysis", "family": "safety", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "red_statin_hepatotox", "family": "safety", "result": "RED", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_a1c_above_target", "family": "routing", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_egfr_45_59_cleared", "family": "routing", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 3 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_metformin_over_cap", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_glipizide_low_egfr", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": null, "blocked_by_field": ["(1 field)"]}, {"id": "yl_pioglitazone_hf", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_acei_arb_hyperk", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_acei_arb_cr_rise", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_acei_plus_arb", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": null, "blocked_by_field": ["(2 field)"]}, {"id": "yl_hctz_ckd4", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_simva_amlodipine", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_atenolol_ckd3", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_acei_arb_pregnancy", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_acei_arb_egfr15", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_bblocker_bradycardia", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_bp_uncontrolled", "family": "routing", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 3 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_tg_500", "family": "safety", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 1 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "yl_ldl_above_target", "family": "routing", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "sys_regimen_unparseable", "family": "system", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": null, "blocked_by_field": null}, {"id": "sys_visit_panel_missing", "family": "system", "result": "YELLOW", "queue": "MEASURE", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": ["(1 field)"]}, {"id": "sys_annual_panel_due", "family": "system", "result": "YELLOW", "queue": "SCHEDULE", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 3 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": ["(1 field)"]}, {"id": "sys_annual_panel_overdue_hard", "family": "system", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": ["(1 field)"]}, {"id": "sys_uacr_never_done", "family": "system", "result": "YELLOW", "queue": "MD", "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 2 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": null}, {"id": "green_by_exclusion", "family": "routing", "result": "GREEN", "queue": null, "approval_status": "draft", "runtime_enabled": false, "pending": ["(รายละเอียดภายใน 6 ข้อ — ดูในระบบภายใน รพ.)"], "blocked_by_field": ["(1 field)"]}]};
+const RULES_DEMO  = {"meta": {"mode": "EXAMPLE", "title": "ชุดกฎตัวอย่างสำหรับสาธิต NCD demo", "warning_th": "ตัวเลขทั้งหมดเป็นตัวอย่าง ไม่ใช่เกณฑ์จริง — เกณฑ์จริงรอ med lead ลงนามใน cpg_rules_config.yaml", "schema_note": "ใช้ schema เดียวกับ cpg_rules_config.yaml (subset) — เพื่อพิสูจน์ว่า interpreter ตัวเดียวอ่านได้ทั้งสองไฟล์"}, "field_catalog": {"fields": [{"name": "hn", "label_th": "HN", "type": "id"}, {"name": "full_name", "label_th": "ชื่อ (สมมติ)", "type": "text"}, {"name": "dx_dm", "label_th": "เบาหวาน", "type": "bool"}, {"name": "dx_ht", "label_th": "ความดันโลหิตสูง", "type": "bool"}, {"name": "med_runout_date", "label_th": "วันยาหมด", "type": "date"}, {"name": "checkin_time", "label_th": "เวลามาถึง", "type": "text"}, {"name": "fbs", "label_th": "FBS", "unit": "mg/dL", "type": "number", "panel": "visit", "window_days": 1, "date_field": "fbs_date", "required_when": "dx_dm", "poc_editable": true}, {"name": "bp_sys", "label_th": "SBP", "unit": "mmHg", "type": "number", "panel": "visit", "window_days": 1, "date_field": "bp_date", "required_when": "always", "poc_editable": true}, {"name": "bp_dia", "label_th": "DBP", "unit": "mmHg", "type": "number", "panel": "visit", "window_days": 1, "date_field": "bp_date", "required_when": "always", "poc_editable": true}, {"name": "bp_source", "label_th": "ที่มาค่า BP", "type": "enum", "values": ["OFFICE", "HOME"]}, {"name": "hba1c", "label_th": "HbA1c", "unit": "%", "type": "number", "panel": "annual", "window_days": 365, "grace_days": 90, "date_field": "hba1c_date", "required_when": "dx_dm"}, {"name": "egfr", "label_th": "eGFR", "type": "number", "panel": "annual", "window_days": 365, "grace_days": 90, "date_field": "egfr_date", "required_when": "always"}, {"name": "k", "label_th": "K⁺", "unit": "mEq/L", "type": "number", "panel": "annual", "window_days": 365, "grace_days": 90, "date_field": "k_date", "required_when": "on_acei_arb"}, {"name": "on_acei_arb", "label_th": "ได้ ACEI/ARB", "type": "bool"}, {"name": "sig_parse_status", "label_th": "สถานะอ่านใบสั่งยา", "type": "enum", "values": ["OK", "UNKNOWN"]}, {"name": "meds_raw", "label_th": "รายการยา (ดิบ)", "type": "text"}, {"name": "drug_intolerance", "label_th": "ประวัติหยุดยา (ไม่ทน/แพ้)", "type": "text"}]}, "data_freshness_policy": {"note_th": "ตัวเลข window/grace เป็นตัวอย่าง — ของจริงรอ med lead กำหนด (P13)", "visit_missing": {"result": "YELLOW", "queue": "MEASURE", "flag_th": "ชุดรอบยายังไม่วัดวันนี้ — วัด/เจาะที่จุดคัดกรองได้เลย"}, "stale_in_grace": {"result": "YELLOW", "queue": "SCHEDULE", "flag_th": "เลยรอบตรวจประจำปี (ยังในผ่อนผัน) — จ่ายยารอบนี้ได้ · ผู้ตามต่อรอ Q33"}, "stale_beyond_grace": {"result": "YELLOW", "queue": "MD", "flag_th": "ไม่เคยตรวจ/เกินระยะผ่อนผัน — เข้าคิวแพทย์ (ข้อมูลขาด ≠ ปกติ)"}}, "rules": [{"id": "ex_red_fbs_high", "family": "routing", "result": "RED", "conditions": {"all": [{"field": "fbs", "op": ">=", "value": 250, "missing": "YELLOW"}]}, "reason_th": "FBS {fbs} mg/dL ≥ 250 (ตัวอย่าง) — ส่งพบแพทย์วันนี้", "urgency": 95, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_red_fbs_low", "family": "routing", "result": "RED", "conditions": {"all": [{"field": "fbs", "op": "<", "value": 70, "missing": "YELLOW"}]}, "reason_th": "FBS {fbs} mg/dL < 70 (ตัวอย่าง) — น้ำตาลต่ำ ส่งพบแพทย์ทันที", "urgency": 99, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_red_bp", "family": "routing", "result": "RED", "conditions": {"any": [{"field": "bp_sys", "op": ">=", "value": 180, "missing": "YELLOW"}, {"field": "bp_dia", "op": ">=", "value": 110, "missing": "YELLOW"}]}, "reason_th": "BP {bp_sys}/{bp_dia} mmHg ≥ 180/110 (ตัวอย่าง) — ส่งพบแพทย์วันนี้", "urgency": 96, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_red_a1c", "family": "routing", "result": "RED", "conditions": {"all": [{"field": "hba1c", "op": ">=", "value": 9.0, "missing": "YELLOW"}]}, "reason_th": "HbA1c {hba1c}% ≥ 9% (ตัวอย่าง) — ส่งพบแพทย์", "urgency": 90, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_red_k_high", "family": "routing", "result": "RED", "conditions": {"all": [{"field": "k", "op": ">=", "value": 5.5, "missing": "YELLOW"}]}, "reason_th": "K⁺ {k} mEq/L ≥ 5.5 (ตัวอย่าง) — ส่งพบแพทย์", "urgency": 97, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_red_egfr_low", "family": "routing", "result": "RED", "conditions": {"all": [{"field": "egfr", "op": "<", "value": 30, "missing": "YELLOW"}]}, "reason_th": "eGFR {egfr} < 30 (ตัวอย่าง) — ส่งพบแพทย์", "urgency": 94, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_yl_a1c", "family": "routing", "result": "YELLOW", "queue": "MD", "conditions": {"all": [{"field": "hba1c", "op": "between", "value": [7.0, 8.9], "missing": "YELLOW"}]}, "reason_th": "HbA1c {hba1c}% อยู่ช่วง 7.0–8.9 (ตัวอย่าง) — แพทย์รีวิว async", "urgency": 60, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_yl_fbs", "family": "routing", "result": "YELLOW", "queue": "MD", "conditions": {"all": [{"field": "fbs", "op": "between", "value": [155, 249], "missing": "YELLOW"}]}, "reason_th": "FBS {fbs} mg/dL อยู่ช่วง 155–249 (ตัวอย่าง) — แพทย์รีวิว async", "urgency": 55, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_yl_bp", "family": "routing", "result": "YELLOW", "queue": "MD", "conditions": {"any": [{"field": "bp_sys", "op": "between", "value": [140, 179], "missing": "YELLOW"}, {"field": "bp_dia", "op": "between", "value": [90, 109], "missing": "YELLOW"}]}, "reason_th": "BP {bp_sys}/{bp_dia} mmHg เกิน 140/90 แต่ไม่ถึงเกณฑ์แดง (ตัวอย่าง) — แพทย์รีวิว", "urgency": 58, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_yl_sig_unknown", "family": "safety", "result": "YELLOW", "queue": "MD", "conditions": {"all": [{"field": "sig_parse_status", "op": "==", "value": "UNKNOWN", "missing": "YELLOW"}]}, "reason_th": "อ่านใบสั่งยาไม่ได้ (sig เป็น free text) — ห้ามเดา ส่งคิวแพทย์ (hard constraint ข้อ 7)", "urgency": 70, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_yl_k_missing_on_acei", "family": "safety", "result": "YELLOW", "queue": "MD", "conditions": {"all": [{"field": "on_acei_arb", "op": "==", "value": true, "missing": "IGNORE"}, {"field": "k", "op": "missing", "missing": "IGNORE"}]}, "reason_th": "ได้ ACEI/ARB แต่ไม่มีผล K⁺ — ต้องมีผลก่อนยืนยันความปลอดภัย (CPG หน้า 13 เป็นที่มาแนวคิด · เกณฑ์ตัวอย่าง)", "urgency": 72, "approval_status": "example", "runtime_enabled": true}, {"id": "ex_green_controlled", "family": "routing", "result": "GREEN", "requires_evaluable_rules": "all", "conditions": {"all": [{"field": "bp_source", "op": "==", "value": "OFFICE", "missing": "YELLOW"}, {"special": "no_non_green_rule_fired"}]}, "reason_th": "ทุกค่าอยู่ในเกณฑ์ตัวอย่าง — A1c {hba1c}% · FBS {fbs} · BP {bp_sys}/{bp_dia} (วัดที่ รพ.) · eGFR {egfr} — แสดงตัวเลขให้คนตรวจตาม D8", "urgency": 0, "approval_status": "example", "runtime_enabled": true}], "pharmacy": {"note_th": "เรียงตามความเสี่ยงขาดยาเป็นหลัก (รอบ 8) · เคสปิดรอบหลุดจากคิวงาน (รอบ 9)", "channels": [{"id": "PICKUP", "label_th": "มารับเอง"}, {"id": "PROXY", "label_th": "ญาติรับแทน"}, {"id": "MAIL", "label_th": "ส่งไปรษณีย์", "note_th": "🔶 ช่องทางนี้เคยถูกตัดจาก scope เฟส 1 (F17) — ผู้ใช้สั่งเพิ่มกลับรอบ 27 · สถานะสุดท้ายรอมติที่ประชุม"}], "statuses": [{"id": "WAIT_PREP", "label_th": "รอจัดยา"}, {"id": "PREPPED", "label_th": "จัดแล้ว รอจ่าย"}, {"id": "HANDED", "label_th": "จ่ายแล้ว — ปิดรอบ"}, {"id": "RETURNED", "label_th": "ไม่มารับ — คืนสต๊อก + ตามตัว"}, {"id": "ESCALATED", "label_th": "ส่งปรึกษาแพทย์ — ออกจากคิวจ่าย"}]}, "question_prompts": {"status": "CANDIDATE", "note_th": "ชุดคำถาม candidate — ต้องผ่าน med lead + พยาบาลรับรองก่อนใช้จริง · คำตอบบันทึกเป็นข้อมูลได้ แต่ห้ามใช้ตัดสินสีโดยไม่มีกฎที่รับรอง (กติการอบ 25)", "f13_note_th": "ตารางดักถาม F13 ฉบับเต็ม (nurse_screening_flow §4) มีอีก 2 เงื่อนไขที่ยังไม่อยู่ใน demo: eGFR รอบก่อนช่วงกลาง (ค่ายังไม่กำหนด) และอาหารโพแทสเซียมสูงสำหรับผู้ได้ MRA — รอ med lead จึงยังไม่ใส่", "minimum": [{"short_th": "อาการวันนี้", "ask_th": "วันนี้เป็นอย่างไรบ้าง มีเรื่องอะไรอยากเล่า/กังวลเป็นพิเศษ"}, {"short_th": "อาการเตือนอันตราย", "ask_th": "มีเจ็บแน่นหน้าอก หอบ ใจสั่น หน้ามืด แขนขาอ่อนแรง ตามัว ไหม"}, {"short_th": "ยาเหลือ/ขาด", "ask_th": "ยากินครบไหม เหลือ/ขาดกี่วัน มีผลข้างเคียงอะไร"}, {"short_th": "สรุป + นัดหน้า", "ask_th": "สรุปสิ่งที่ต้องทำ + นัดครั้งหน้า + ช่องทางติดต่อถ้ามีอาการ"}], "triggers": [{"id": "q_acei_nsaid", "layer": "PREEMPTIVE", "when": {"field": "on_acei_arb", "op": "==", "value": true}, "short_th": "NSAIDs/สมุนไพร/ชะเอม", "ask_th": "ช่วงนี้ซื้อยาแก้ปวด/ยาชุด (NSAIDs) สมุนไพร หรือชะเอม มากินเองบ้างไหม", "why_th": "ผล Cr/K⁺ จะออกหลังผู้ป่วยกลับบ้านแล้ว — ต้องดักถามตั้งแต่วันเจาะ (แก้ F13)", "cpg_ref": "หน้า 13 · หน้า 10 ข้อ 1.1"}, {"id": "q_dm_hypo", "layer": "TRIGGER", "when": {"field": "dx_dm", "op": "==", "value": true}, "short_th": "อาการน้ำตาลต่ำ", "ask_th": "มีช่วงที่ใจสั่น เหงื่อแตก หิวจัด มือสั่น (อาการน้ำตาลต่ำ) ไหม เกิดตอนไหน", "why_th": "อาการ hypoglycemia ที่ผู้ป่วยมักไม่เล่าเองถ้าไม่ถาม", "cpg_ref": "flow hypoglycemia (ใช้เป็นที่มาแนวคิด — คำถามจริงรอรับรอง)"}, {"id": "q_home_bp", "layer": "TRIGGER", "when": {"field": "bp_source", "op": "==", "value": "HOME"}, "short_th": "ขอสมุด HBPM", "ask_th": "ค่าความดันที่แจ้งมาจากการวัดที่บ้าน — มีสมุดบันทึก HBPM มาด้วยไหม", "why_th": "ระบบไม่ใช้ตัวเลขจากคำบอกเล่าตัดสินสี — เก็บเป็นธงส่งให้แพทย์ดูหลักฐาน (Q26)", "cpg_ref": "หน้า 12 HBPM"}, {"id": "q_annual_due", "layer": "TRIGGER", "when": {"special": "annual_overdue"}, "short_th": "แจ้งเจาะชุดประจำปี", "ask_th": "แจ้งผู้ป่วย: วันนี้ต้องเจาะชุดประจำปีเพิ่ม (ดูรายการในช่อง 'งานวันนี้')", "why_th": "กันเจาะตกหล่นจนเลยรอบ — ที่มาของธง SCHEDULE (D13)"}]}, "drug_advisor": {"status": "EXAMPLE", "note_th": "ตัวอย่างกลไก D5 — บันไดยาจริงรอ Q20–Q23 · แพทย์ตัดสินเสมอ ระบบไม่สั่งยา · insulin รอที่ประชุม", "sig_unknown_th": "อ่านใบสั่งยาไม่ได้ — แสดงยาปัจจุบันเท่านั้น แพทย์เขียนคำสั่งเอง (ห้ามเดา — D5)", "no_match_th": "อ่านใบสั่งยาได้ แต่ไม่ตรงรายการในคลังยา — ไม่เสนออัตโนมัติ ให้แพทย์สั่งเอง (ห้ามเดา)", "advisor_triggers": {"DM": ["ex_yl_a1c", "ex_yl_fbs"], "HT": ["ex_yl_bp"]}, "intolerance_policy": {"same_drug_th": "ไม่เสนอ — ผู้ป่วยเคยหยุดยานี้เพราะ", "same_class_th": "⚠️ กลุ่มเดียวกับยาที่เคยหยุด — ให้แพทย์พิจารณา (ระบบไม่ตัดสิทธิ์ทั้งกลุ่มแทนแพทย์ · เกณฑ์ระดับ class รอ med lead)"}, "formulary": {"note_th": "คลังยากลาง (ตัวอย่าง) — ติ๊กความพร้อมของไซต์ได้ในแท็บ กฎ/Admin", "drugs": [{"id": "metformin", "name": "Metformin", "class": "Biguanide", "indication": "DM", "ladder": ["500mg 1x1", "500mg 1x2", "850mg 1x2", "1000mg 1x2"], "note_th": "เพดานตาม eGFR ยังไม่เคาะ (BS2/Q23)"}, {"id": "glipizide", "name": "Glipizide", "class": "SU", "indication": "DM", "ladder": ["5mg 1x1", "5mg 1x2", "10mg 1x2"]}, {"id": "amlodipine", "name": "Amlodipine", "class": "CCB", "indication": "HT", "ladder": ["5mg 1x1", "10mg 1x1"]}, {"id": "enalapril", "name": "Enalapril", "class": "ACEI", "indication": "HT", "ladder": ["5mg 1x1", "10mg 1x1", "20mg 1x1"]}, {"id": "losartan", "name": "Losartan", "class": "ARB", "indication": "HT", "ladder": ["50mg 1x1", "100mg 1x1"]}, {"id": "hctz", "name": "HCTZ", "class": "Thiazide", "indication": "HT", "ladder": ["12.5mg 1x1", "25mg 1x1"], "note_th": "ขนาดเริ่ม 2.5 vs 12.5 ยังเป็นคำถาม Q32"}]}}};
+const SAMPLE_CSV  = "hn,full_name,dx_dm,dx_ht,med_runout_date,checkin_time,fbs,fbs_date,bp_sys,bp_dia,bp_date,bp_source,hba1c,hba1c_date,egfr,egfr_date,k,k_date,on_acei_arb,sig_parse_status,meds_raw,drug_intolerance\n900001,สมชาย ใจงาม (สมมติ),TRUE,TRUE,2026-08-14,07:05,95,2026-08-14,112,68,2026-08-14,OFFICE,5.9,2026-03-10,62,2026-02-15,,,FALSE,OK,Metformin 500mg 1x2 pc; Amlodipine 5mg 1x1,\n900034,สุพรรณ คำมูล (สมมติ),FALSE,TRUE,2026-08-20,07:11,,,148,94,2026-08-14,HOME,,,93,2026-05-15,3.9,2026-05-15,TRUE,OK,Losartan 50mg 1x1,amlodipine=บวม\n900002,สมหญิง แก้วมณี (สมมติ),TRUE,TRUE,2026-08-15,07:12,102,2026-08-14,117,71,2026-08-14,OFFICE,6.2,2026-04-10,71,2026-03-15,,,FALSE,OK,Metformin 850mg 1x2; Amlodipine 10mg 1x1,\n900035,อรุณ พูนผล (สมมติ),FALSE,TRUE,2026-08-21,07:18,,,154,94,2026-08-14,HOME,,,64,2026-06-15,,,FALSE,OK,HCTZ 25mg 1x1,\n900003,วิเชียร ทองแท้ (สมมติ),TRUE,TRUE,2026-08-16,07:19,109,2026-08-14,122,74,2026-08-14,OFFICE,6.5,2026-05-10,80,2026-04-15,4.0,2026-04-15,TRUE,OK,Metformin 1000mg 1x2; Enalapril 5mg 1x1,\n900036,มาลัย วงศ์คำ (สมมติ),TRUE,FALSE,2026-08-22,07:25,120,2026-08-14,112,83,2026-08-14,OFFICE,6.4,2025-07-20,73,2026-07-15,,,FALSE,OK,Glipizide 5mg 1x1; Metformin 850mg 1x2,\n900004,บุญมี คำมูล (สมมติ),TRUE,TRUE,2026-08-17,07:26,116,2026-08-14,127,77,2026-08-14,OFFICE,6.8,2026-06-10,89,2026-05-15,4.1,2026-05-15,TRUE,OK,Glipizide 5mg 1x1; Metformin 850mg 1x2; Losartan 50mg 1x1,\n900037,ไพโรจน์ อินทร์ตา (สมมติ),TRUE,FALSE,2026-08-14,07:32,127,2026-08-14,117,68,2026-08-14,OFFICE,6.4,2025-07-20,82,2026-02-15,,,FALSE,OK,Metformin 500mg 1x2 pc,\n900005,ประยูร พูนผล (สมมติ),TRUE,TRUE,2026-08-18,07:33,123,2026-08-14,132,80,2026-08-14,OFFICE,6.1,2026-07-10,98,2026-06-15,,,FALSE,OK,Metformin 500mg 1x2 pc; HCTZ 25mg 1x1,\n900038,เพ็ญศรี ศรีสุข (สมมติ),TRUE,FALSE,2026-08-15,07:39,134,2026-08-14,122,71,2026-08-14,OFFICE,6.4,2025-07-20,91,2026-03-15,,,FALSE,OK,Metformin 850mg 1x2,\n900006,ทองดี วงศ์คำ (สมมติ),TRUE,TRUE,2026-08-19,07:40,130,2026-08-14,112,83,2026-08-14,OFFICE,6.4,2026-03-10,69,2026-07-15,,,FALSE,OK,Metformin 850mg 1x2; Amlodipine 5mg 1x1,\n900039,ถาวร บุญเรือง (สมมติ),FALSE,TRUE,2026-08-16,07:46,,,127,74,2026-08-14,OFFICE,,,78,2025-07-05,4.4,2026-04-15,TRUE,OK,Losartan 50mg 1x1,\n900007,จันทร์ อินทร์ตา (สมมติ),TRUE,TRUE,2026-08-20,07:47,137,2026-08-14,117,68,2026-08-14,OFFICE,6.7,2026-04-10,78,2026-02-15,,,FALSE,OK,Metformin 1000mg 1x2; Amlodipine 10mg 1x1,\n900040,นงนุช สายทอง (สมมติ),FALSE,TRUE,2026-08-17,07:53,,,,,,,,,71,2026-05-15,,,FALSE,OK,HCTZ 25mg 1x1,\n900008,แสงเดือน ศรีสุข (สมมติ),TRUE,TRUE,2026-08-21,07:54,144,2026-08-14,122,71,2026-08-14,OFFICE,6.0,2026-05-10,87,2026-03-15,4.5,2026-03-15,TRUE,OK,Glipizide 5mg 1x1; Metformin 850mg 1x2; Enalapril 5mg 1x1,\n900041,สมชาย ใจงาม (สมมติ),FALSE,TRUE,2026-08-18,08:00,,,,,,,,,80,2026-06-15,,,FALSE,OK,Amlodipine 5mg 1x1,\n900009,อำนวย บุญเรือง (สมมติ),TRUE,TRUE,2026-08-22,08:01,96,2026-08-14,127,74,2026-08-14,OFFICE,6.3,2026-06-10,96,2026-04-15,3.8,2026-04-15,TRUE,OK,Metformin 500mg 1x2 pc; Losartan 50mg 1x1,\n900042,สมหญิง แก้วมณี (สมมติ),FALSE,TRUE,2026-08-19,08:07,,,,,,,,,89,2026-07-15,,,FALSE,OK,Amlodipine 10mg 1x1,\n900010,รัตนา สายทอง (สมมติ),TRUE,TRUE,2026-08-14,08:08,103,2026-08-14,132,77,2026-08-14,OFFICE,6.6,2026-07-10,67,2026-05-15,,,FALSE,OK,Metformin 850mg 1x2; HCTZ 25mg 1x1,\n900043,วิเชียร ทองแท้ (สมมติ),TRUE,FALSE,2026-08-20,08:14,114,2026-08-14,122,68,2026-08-14,OFFICE,6.5,2026-05-10,98,2026-02-15,,,FALSE,UNKNOWN,ยาเดิมตามใบสั่งก่อนหน้า (ลายมือ อ่านไม่ได้),\n900011,สุนีย์ ใจงาม (สมมติ),TRUE,TRUE,2026-08-15,08:15,110,2026-08-14,112,80,2026-08-14,OFFICE,5.9,2026-03-10,76,2026-06-15,,,FALSE,OK,Metformin 1000mg 1x2; Amlodipine 5mg 1x1,\n900044,บุญมี คำมูล (สมมติ),TRUE,FALSE,2026-08-21,08:21,121,2026-08-14,127,71,2026-08-14,OFFICE,6.8,2026-06-10,69,2026-03-15,,,FALSE,UNKNOWN,ยาเดิมตามใบสั่งก่อนหน้า (ลายมือ อ่านไม่ได้),\n900012,คำปัน แก้วมณี (สมมติ),TRUE,TRUE,2026-08-16,08:22,117,2026-08-14,117,83,2026-08-14,OFFICE,6.2,2026-04-10,85,2026-07-15,,,FALSE,OK,Glipizide 5mg 1x1; Metformin 850mg 1x2; Amlodipine 10mg 1x1,\n900045,ประยูร พูนผล (สมมติ),TRUE,TRUE,2026-08-22,08:28,128,2026-08-14,132,74,2026-08-14,OFFICE,6.1,2026-07-10,78,2026-04-15,,,TRUE,OK,Metformin 500mg 1x2 pc; Losartan 50mg 1x1,\n900013,บัวลอย ทองแท้ (สมมติ),TRUE,TRUE,2026-08-17,08:29,124,2026-08-14,122,68,2026-08-14,OFFICE,6.5,2026-05-10,94,2026-02-15,4.2,2026-02-15,TRUE,OK,Metformin 500mg 1x2 pc; Enalapril 5mg 1x1,\n900046,ทองดี วงศ์คำ (สมมติ),FALSE,TRUE,2026-08-14,08:35,,,,,,,,,76,2025-07-10,,,FALSE,OK,Amlodipine 5mg 1x1,\n900014,สุพรรณ คำมูล (สมมติ),TRUE,TRUE,2026-08-18,08:36,131,2026-08-14,127,71,2026-08-14,OFFICE,6.8,2026-06-10,65,2026-03-15,4.3,2026-03-15,TRUE,OK,Metformin 850mg 1x2; Losartan 50mg 1x1,\n900047,จันทร์ อินทร์ตา (สมมติ),FALSE,TRUE,2026-08-15,08:42,,,192,104,2026-08-14,OFFICE,,,96,2026-06-15,,,FALSE,OK,Amlodipine 10mg 1x1,\n900015,อรุณ พูนผล (สมมติ),TRUE,FALSE,2026-08-19,08:43,138,2026-08-14,132,74,2026-08-14,OFFICE,6.1,2026-07-10,74,2026-04-15,,,FALSE,OK,Metformin 1000mg 1x2,\n900048,แสงเดือน ศรีสุข (สมมติ),TRUE,FALSE,2026-08-16,08:49,298,2026-08-14,122,83,2026-08-14,OFFICE,6.0,2026-05-10,67,2026-07-15,,,FALSE,OK,Glipizide 5mg 1x1; Metformin 850mg 1x2,\n900016,มาลัย วงศ์คำ (สมมติ),TRUE,FALSE,2026-08-20,08:50,145,2026-08-14,112,77,2026-08-14,OFFICE,6.4,2026-03-10,83,2026-05-15,,,FALSE,OK,Glipizide 5mg 1x1; Metformin 850mg 1x2,\n900049,อำนวย บุญเรือง (สมมติ),TRUE,FALSE,2026-08-17,08:56,63,2026-08-14,127,68,2026-08-14,OFFICE,6.3,2026-06-10,76,2026-02-15,,,FALSE,OK,Metformin 500mg 1x2 pc,\n900017,ไพโรจน์ อินทร์ตา (สมมติ),TRUE,FALSE,2026-08-21,08:57,97,2026-08-14,117,80,2026-08-14,OFFICE,6.7,2026-04-10,92,2026-06-15,,,FALSE,OK,Metformin 500mg 1x2 pc,\n900050,รัตนา สายทอง (สมมติ),TRUE,FALSE,2026-08-18,09:03,108,2026-08-14,132,71,2026-08-14,OFFICE,9.8,2026-07-10,85,2026-03-15,,,FALSE,OK,Metformin 850mg 1x2,\n900018,เพ็ญศรี ศรีสุข (สมมติ),TRUE,FALSE,2026-08-22,09:04,104,2026-08-14,122,83,2026-08-14,OFFICE,6.0,2026-05-10,63,2026-07-15,,,FALSE,OK,Metformin 850mg 1x2,\n900051,สุนีย์ ใจงาม (สมมติ),TRUE,TRUE,2026-08-19,09:10,115,2026-08-14,112,74,2026-08-14,OFFICE,5.9,2026-03-10,94,2026-04-15,5.9,2026-04-15,TRUE,OK,Metformin 1000mg 1x2; Enalapril 10mg 1x1,\n900019,ถาวร บุญเรือง (สมมติ),TRUE,FALSE,2026-08-14,09:11,111,2026-08-14,127,68,2026-08-14,OFFICE,6.3,2026-06-10,72,2026-02-15,,,FALSE,OK,Metformin 1000mg 1x2,\n900020,นงนุช สายทอง (สมมติ),TRUE,FALSE,2026-08-15,09:18,118,2026-08-14,132,71,2026-08-14,OFFICE,6.6,2026-07-10,81,2026-03-15,,,FALSE,OK,Glipizide 5mg 1x1; Metformin 850mg 1x2,\n900021,สมชาย ใจงาม (สมมติ),FALSE,TRUE,2026-08-16,09:25,,,112,74,2026-08-14,OFFICE,,,90,2026-04-15,,,FALSE,OK,Amlodipine 5mg 1x1,\n900022,สมหญิง แก้วมณี (สมมติ),FALSE,TRUE,2026-08-17,09:32,,,117,77,2026-08-14,OFFICE,,,99,2026-05-15,,,FALSE,OK,Amlodipine 10mg 1x1,\n900023,วิเชียร ทองแท้ (สมมติ),FALSE,TRUE,2026-08-18,09:39,,,122,80,2026-08-14,OFFICE,,,70,2026-06-15,4.4,2026-06-15,TRUE,OK,Enalapril 5mg 1x1,\n900024,บุญมี คำมูล (สมมติ),FALSE,TRUE,2026-08-19,09:46,,,127,83,2026-08-14,OFFICE,,,79,2026-07-15,4.5,2026-07-15,TRUE,OK,Losartan 50mg 1x1,\n900025,ประยูร พูนผล (สมมติ),FALSE,TRUE,2026-08-20,09:53,,,132,68,2026-08-14,OFFICE,,,88,2026-02-15,,,FALSE,OK,HCTZ 25mg 1x1,\n900026,ทองดี วงศ์คำ (สมมติ),FALSE,TRUE,2026-08-21,10:00,,,112,71,2026-08-14,OFFICE,,,97,2026-03-15,,,FALSE,OK,Amlodipine 5mg 1x1,\n900027,จันทร์ อินทร์ตา (สมมติ),TRUE,FALSE,2026-08-22,10:07,112,2026-08-14,117,74,2026-08-14,OFFICE,7.2,2026-04-10,68,2026-04-15,,,FALSE,OK,Metformin 1000mg 1x2,\n900028,แสงเดือน ศรีสุข (สมมติ),TRUE,FALSE,2026-08-14,10:14,119,2026-08-14,122,77,2026-08-14,OFFICE,7.6,2026-05-10,77,2026-05-15,,,FALSE,OK,Glipizide 5mg 1x1; Metformin 850mg 1x2,\n900029,อำนวย บุญเรือง (สมมติ),TRUE,FALSE,2026-08-15,10:21,126,2026-08-14,127,80,2026-08-14,OFFICE,8.0,2026-06-10,86,2026-06-15,,,FALSE,OK,Metformin 500mg 1x2 pc,\n900030,รัตนา สายทอง (สมมติ),TRUE,FALSE,2026-08-16,10:28,133,2026-08-14,132,83,2026-08-14,OFFICE,8.4,2026-07-10,95,2026-07-15,,,FALSE,OK,Metformin 850mg 1x2,\n900031,สุนีย์ ใจงาม (สมมติ),FALSE,TRUE,2026-08-17,10:35,,,144,88,2026-08-14,OFFICE,,,66,2026-02-15,,,FALSE,OK,Amlodipine 5mg 1x1,\n900032,คำปัน แก้วมณี (สมมติ),FALSE,TRUE,2026-08-18,10:42,,,152,92,2026-08-14,OFFICE,,,75,2026-03-15,,,FALSE,OK,Amlodipine 10mg 1x1,enalapril=ไอ\n900033,บัวลอย ทองแท้ (สมมติ),FALSE,TRUE,2026-08-19,10:49,,,160,96,2026-08-14,OFFICE,,,84,2026-04-15,3.8,2026-04-15,TRUE,OK,Enalapril 5mg 1x1,\n";
+const BUILD_INFO  = {"built_at": "2026-08-14 14:19", "default_ref_date": "2026-08-14", "sources": ["docs/cpg_rules_config.yaml", "demo/demo_ruleset.yaml", "demo/sample_cases.csv"]};
+
+/* ══════════════════ state ══════════════════ */
+const CATALOG = RULES_DEMO.field_catalog.fields;
+const FRESH_POLICY = RULES_DEMO.data_freshness_policy;
+let rawRows = [];
+let srcInfo = {label:'', kind:''};
+let degScenario = null;
+let itSelectedHn = null;
+const openCases = new Set();   // จำสถานะกาง/หุบ ข้ามการ re-render
+const manualEdits = {};        // {hn: {field: {value, at, by, prev}}} — คีย์หน้างาน (POC) พร้อม provenance
+let nurseSort = 'arrival';     // arrival | red | yellow | green | hn
+let docSort   = 'red';
+let layoutMode = 'card';       // card | tbl — สลับได้จาก toolbar เพื่อเทียบ UX สองแบบ
+let searchQ = '';              // ค้นหา HN/ชื่อ — กรองทุกหน้าบทบาทพร้อมกัน
+function matchesSearch(row){
+  if(!searchQ) return true;
+  const q=searchQ.toLowerCase();
+  return String(row.hn).toLowerCase().includes(q) || (row.full_name||'').toLowerCase().includes(q);
+}
+function searchNote(shown, total){
+  return searchQ? '<div class="card" style="border-left:4px solid var(--blue)">🔍 กรอง "'+searchQ+'" — แสดง '+shown+' จาก '+total+' เคส <button onclick="clearSearch()" style="margin-left:8px;padding:1px 10px">แสดงทั้งหมด</button></div>' : '';
+}
+function clearSearch(){ searchQ=''; document.getElementById('searchBox').value=''; renderAll(); }
+/* กระโดดจากกระดานวางแผน → เคสนั้นในหน้างานจ่ายยา (แก้ friction "จ่ายแล้วต้องกลับมางมเอง") */
+function jumpToCase(hn){
+  pharmView='work';
+  openCases.clear();      // กระโดด = โฟกัสเคสเดียว — หุบเคสที่ค้างกางจากรอบก่อนทั้งหมด
+  openCases.add(hn);
+  renderAll();
+  let elc=document.getElementById('pcase-'+hn);
+  if(!elc){
+    // เคสยังจ่ายไม่ได้ → อยู่ในตารางท้ายหน้า: เปิด section แล้วชี้แถวนั้นแทน
+    const sec=document.getElementById('pharmBlocked');
+    if(sec) sec.open=true;
+    elc=document.getElementById('bcase-'+hn);
+  }
+  if(elc){ elc.scrollIntoView({behavior:'smooth', block:'center'}); elc.classList.add('flash'); setTimeout(()=>elc.classList.remove('flash'), 2400); }
+}
+
+/* ══════════════════ ingest: CSV / TSV ══════════════════ */
+function parseDelimited(text, delim){
+  text = text.replace(/^﻿/,'').replace(/\r\n?/g,'\n');
+  const lines = [];
+  let row=[], cell='', q=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(q){ if(ch==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=ch; }
+    else{
+      if(ch==='"') q=true;
+      else if(ch===delim){ row.push(cell); cell=''; }
+      else if(ch==='\n'){ row.push(cell); lines.push(row); row=[]; cell=''; }
+      else cell+=ch;
+    }
+  }
+  if(cell!==''||row.length){ row.push(cell); lines.push(row); }
+  return lines.filter(r=>r.some(c=>c.trim()!==''));
+}
+function ingest(text, delim, label, kind){
+  const lines = parseDelimited(text, delim);
+  if(lines.length<2){ alert('ไม่พบข้อมูล (ต้องมีหัวคอลัมน์ + อย่างน้อย 1 แถว)'); return; }
+  const headers = lines[0].map(h=>h.trim());
+  rawRows = lines.slice(1).map(cells=>{
+    const o={__cols:headers};
+    headers.forEach((h,i)=>o[h]=(cells[i]||'').trim());
+    return o;
+  });
+  srcInfo = {label, kind, headers};
+  itSelectedHn = null;
+  renderAll();
+}
+
+/* ══════════════════ field catalog layer ══════════════════ */
+function typedValue(fdef, raw){
+  if(raw===undefined||raw===null||String(raw).trim()==='') return null;
+  const s=String(raw).trim();
+  switch(fdef.type){
+    case 'number': { const n=parseFloat(s); return isNaN(n)?{__err:s}:n; }
+    case 'bool':   { const u=s.toUpperCase(); if(['TRUE','1','ใช่','Y'].includes(u))return true; if(['FALSE','0','ไม่','N'].includes(u))return false; return {__err:s}; }
+    case 'enum':   { const u=s.toUpperCase(); return (fdef.values||[]).includes(u)?u:{__err:s}; }
+    case 'date':   { const d=new Date(s+'T00:00:00'); return isNaN(d)?{__err:s}:s; }
+    default: return s;
+  }
+}
+function daysBetween(a,b){ return Math.round((new Date(a+'T00:00:00') - new Date(b+'T00:00:00'))/86400000); }
+function refDateStr(){
+  let d = document.getElementById('refDate').value || BUILD_INFO.default_ref_date;
+  if(degScenario==='S1'){
+    const dd=new Date(d+'T00:00:00'); dd.setDate(dd.getDate()+2);
+    d = dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0'); // ห้าม toISOString — UTC เพี้ยนวันในโซนไทย
+  }
+  return d;
+}
+function requiredFor(fdef, row){
+  const w=fdef.required_when;
+  if(!w) return false;
+  if(w==='always') return true;
+  return getFieldRaw(row, w).value===true;
+}
+function getFieldRaw(row,name){
+  const fdef = CATALOG.find(f=>f.name===name) || {name,type:'text'};
+  let raw = row[name];
+  if(degScenario==='S2' && (name==='hba1c'||name==='hba1c_date')) raw='';
+  if(degScenario==='S3' && name==='sig_parse_status' && raw) raw='UNKNOWN';
+  // ค่าคีย์หน้างานทับค่าจากแหล่งข้อมูลเสมอ (วัดซ้ำที่จุดคัดกรองคือข้อมูลสดที่สุด — ใช้ได้แม้ในโหมด degraded)
+  let manual = null;
+  const me = manualEdits[row.hn];
+  if(me && me[name]!==undefined){ manual = me[name]; raw = String(manual.value); }
+  const v = typedValue(fdef, raw);
+  return {fdef, raw, manual, value:(v&&v.__err!==undefined)?null:v, parseError:(v&&v.__err!==undefined)?v.__err:null};
+}
+function fieldState(row, fdef){
+  const g = getFieldRaw(row, fdef.name);
+  const out = {name:fdef.name, fdef, raw:g.raw, value:g.value, manual:g.manual, date:null, age:null, status:null, usable:false, note:''};
+  if(g.parseError){ out.status='PARSE_ERR'; out.note='แปลงค่าไม่ได้: "'+g.parseError+'"'; return out; }
+  if(g.value===null){ out.status='MISSING'; return out; }
+  if(!fdef.window_days){ out.status='FRESH'; out.usable=true; return out; }
+  const dRaw = fdef.date_field ? getFieldRaw(row, fdef.date_field) : null;
+  if(!dRaw || dRaw.value===null){ out.status='NO_DATE'; out.note='มีค่าแต่ไม่มีวันที่กำกับ — ใช้ตัดสินไม่ได้'; return out; }
+  out.date = dRaw.value;
+  out.age = daysBetween(refDateStr(), out.date);
+  if(fdef.panel==='visit'){
+    if(out.age<=fdef.window_days){ out.status='FRESH'; out.usable=true; }
+    else { out.status='STALE_VISIT'; out.note='ค่าเก่า '+out.age+' วัน — ต้องวัดใหม่ที่จุดคัดกรอง'; }
+  }else{
+    const grace = fdef.grace_days||0;
+    if(out.age<=fdef.window_days){ out.status='FRESH'; out.usable=true; }
+    else if(out.age<=fdef.window_days+grace){ out.status='IN_GRACE'; out.usable=true; out.note='เลยรอบ '+(out.age-fdef.window_days)+' วัน (ในผ่อนผัน)'; }
+    else { out.status='BEYOND'; out.note='เกินผ่อนผัน (อายุ '+out.age+' วัน)'; }
+  }
+  return out;
+}
+
+/* ══════════════════ interpreter (3-valued) ══════════════════ */
+const T='TRUE', F='FALSE', U='UNDETERMINED';
+function evalLeaf(cond, states, row){
+  if(cond.special) return {state:U, special:cond.special};
+  const st = states[cond.field] || fieldState(row, CATALOG.find(f=>f.name===cond.field)||{name:cond.field,type:'text'});
+  if(cond.op==='missing') return {state: st.value===null||!st.usable&&st.status==='MISSING' ? T : (st.usable?F:U), st};
+  if(!st.usable) return {state:U, st};
+  const v=st.value, val=cond.value;
+  let r;
+  switch(cond.op){
+    case '>=': r = v>=val; break;
+    case '>':  r = v> val; break;
+    case '<':  r = v< val; break;
+    case '<=': r = v<=val; break;
+    case '==': r = v===val; break;
+    case 'in': r = Array.isArray(val)&&val.includes(v); break;
+    case 'between': r = v>=val[0]&&v<=val[1]; break;
+    case 'exists': r = true; break;
+    default: return {state:U, st, note:'operator ไม่รู้จัก: '+cond.op};
+  }
+  return {state: r?T:F, st};
+}
+function evalGroup(group, states, row, trace){
+  if(group.all){
+    const rs = group.all.map(c=>evalNode(c,states,row,trace));
+    if(rs.some(x=>x===F)) return F;
+    if(rs.every(x=>x===T)) return T;
+    return U;
+  }
+  if(group.any){
+    const rs = group.any.map(c=>evalNode(c,states,row,trace));
+    if(rs.some(x=>x===T)) return T;
+    if(rs.every(x=>x===F)) return F;
+    return U;
+  }
+  return U;
+}
+function evalNode(node, states, row, trace){
+  if(node.all||node.any) return evalGroup(node,states,row,trace);
+  const r = evalLeaf(node,states,row);
+  if(trace) trace.push({cond:node, result:r.state, special:node.special||null});
+  return node.special ? U : r.state;
+}
+function fillReason(tpl, states, row){
+  return tpl.replace(/\{(\w+)\}/g,(m,name)=>{
+    const st = states[name] || fieldState(row, CATALOG.find(f=>f.name===name)||{name,type:'text'});
+    if(st.value===null||st.value===undefined) return '—';
+    let s = String(st.value);
+    if(st.status==='IN_GRACE') s += ' (ค่าเก่า '+st.age+' วัน)';
+    return s;
+  });
+}
+function gateAction(meta, rule){
+  const ok = meta.approval_status==='signed' && rule.approval_status==='signed' && rule.runtime_enabled===true
+    && !(rule.blocked_by_field&&rule.blocked_by_field.length) && !(rule.pending&&rule.pending.length);
+  return ok?'EVALUATE':'DO_NOT_EVALUATE';
+}
+function classify(row){
+  const mode = document.getElementById('rulesetSel').value;
+  const states={};
+  CATALOG.forEach(f=>{ states[f.name]=fieldState(row,f); });
+  if(mode==='REAL'){
+    const meta = RULES_REAL.meta||{}, rules = RULES_REAL.rules||[];
+    const disabled = rules.map(r=>({id:r.id, action:gateAction(meta,r)})).filter(r=>r.action!=='EVALUATE');
+    return {mode, states, color:'YELLOW', queueMain:'FLOW',
+      fired:[], flags:[{queue:'FLOW', text:'ruleset จริงยังไม่ลงนาม — กฎทั้ง '+rules.length+' ข้อ DO_NOT_EVALUATE → ใช้ flow เดิม แพทย์ตรวจทุกเคส'}],
+      disabledRules:disabled, greenBlocked:['green_rule_dependency: มีกฎ DO_NOT_EVALUATE '+disabled.length+' ข้อ → กฎเขียวห้ามประเมิน'], trace:[]};
+  }
+  const rules = RULES_DEMO.rules;
+  const fired=[], trace=[], flags=[], greenBlocked=[];
+  const usedFields = {};
+  rules.filter(r=>r.result!=='GREEN').forEach(rule=>{
+    const tr=[]; const res = evalGroup(rule.conditions, states, row, tr);
+    trace.push({rule, result:res, leaf:tr});
+    if(res===T){
+      fired.push({rule, reason: fillReason(rule.reason_th, states, row)});
+      JSON.stringify(rule.conditions).replace(/"field":"(\w+)"/g,(m,f)=>{usedFields[f]=true;return m;});
+    }
+  });
+  CATALOG.forEach(f=>{
+    if(!requiredFor(f,row)) return;
+    const st=states[f.name];
+    if(f.panel==='visit'){
+      if(st.status!=='FRESH') flags.push({queue:FRESH_POLICY.visit_missing.queue, text:st.fdef.label_th+': '+FRESH_POLICY.visit_missing.flag_th+(st.status==='STALE_VISIT'?' ('+st.note+')':'')});
+    }else if(f.panel==='annual'){
+      if(st.status==='MISSING'||st.status==='BEYOND'||st.status==='NO_DATE'||st.status==='PARSE_ERR')
+        flags.push({queue:FRESH_POLICY.stale_beyond_grace.queue, text:st.fdef.label_th+': '+FRESH_POLICY.stale_beyond_grace.flag_th+(st.note?' — '+st.note:'')});
+      else if(st.status==='IN_GRACE' && !usedFields[f.name])
+        flags.push({queue:FRESH_POLICY.stale_in_grace.queue, text:st.fdef.label_th+': '+FRESH_POLICY.stale_in_grace.flag_th+' — '+st.note});
+    }
+  });
+  const nonGreenFired = fired.length>0, anyFlag = flags.length>0;
+  rules.filter(r=>r.result==='GREEN').forEach(rule=>{
+    if(nonGreenFired){ greenBlocked.push('มีกฎอื่น fire แล้ว '+fired.length+' ข้อ'); return; }
+    if(anyFlag){ greenBlocked.push('มีธงข้อมูลขาด/เลยรอบค้างอยู่'); return; }
+    const explicit = {all:(rule.conditions.all||[]).filter(c=>!c.special)};
+    const res = explicit.all.length? evalGroup(explicit,states,row,[]) : T;
+    if(res===T) fired.push({rule, reason: fillReason(rule.reason_th, states, row)});
+    else greenBlocked.push(res===U?'เงื่อนไขกฎเขียวประเมินไม่ได้ (ข้อมูลไม่พอ)':'เงื่อนไขกฎเขียวไม่ผ่าน (เช่น BP ไม่ได้วัดที่ รพ.)');
+  });
+  let color='YELLOW';
+  const colors = fired.map(f=>f.rule.result).concat(flags.length?['YELLOW']:[]);
+  if(colors.includes('RED')) color='RED';
+  else if(colors.includes('YELLOW')) color='YELLOW';
+  else if(colors.includes('GREEN')) color='GREEN';
+  else { color='YELLOW'; greenBlocked.push('ไม่มีกฎใด fire และยืนยันเขียวไม่ได้ → ตกเหลือง (ห้าม default เขียว)'); }
+  const queues = new Set(fired.filter(f=>f.rule.queue).map(f=>f.rule.queue).concat(flags.map(f=>f.queue)));
+  let queueMain = null;
+  if(color==='RED') queueMain='พบแพทย์วันนี้';
+  else if(color==='YELLOW') queueMain = queues.has('MD')?'MD':(queues.has('SCHEDULE')?'SCHEDULE':(queues.has('MEASURE')?'MEASURE':'MD'));
+  else queueMain='ห้องยา';
+  return {mode, states, color, queueMain, queues:[...queues], fired, flags, greenBlocked, trace, disabledRules:[]};
+}
+
+/* ══════════════════ ask-guidance + drug advisor ══════════════════ */
+function questionsFor(row, cls){
+  const QP = RULES_DEMO.question_prompts;
+  const out = {minimum: QP.minimum, triggered: [], note: QP.note_th, status: QP.status};
+  QP.triggers.forEach(t=>{
+    let hit=false;
+    if(t.when.special==='annual_overdue'){
+      hit = CATALOG.some(f=>f.panel==='annual'&&requiredFor(f,row)&&['IN_GRACE','BEYOND','MISSING'].includes(cls.states[f.name].status));
+    }else hit = evalLeaf(t.when, cls.states, row).state===T;
+    if(hit) out.triggered.push(t);
+  });
+  return out;
+}
+/* drug advisor v2 — คลังยากลาง + บันไดขั้นยา + ประวัติหยุดยา (ตัวอย่างกลไกทั้งหมด — D5) */
+const DA = RULES_DEMO.drug_advisor || null;
+const siteForm = {};   // ความพร้อมยาของไซต์นี้ — ติ๊กในแท็บ Admin (สร้างคลังครั้งเดียว ไซต์เลือกเอา)
+if(DA) DA.formulary.drugs.forEach(d=>{ siteForm[d.id]=true; });
+function parseMeds(row){
+  // parse เฉพาะเมื่อ sig สะอาด · รูปแบบ "ชื่อ 500mg 1x2" — ไม่ตรง pattern = ไม่เดา
+  const out=[];
+  const raw = row.meds_raw||'';
+  raw.split(';').forEach(part=>{
+    const m = part.trim().match(/^([A-Za-z]+)\s+([\d.]+)\s*mg\s+(\d+x\d+)/);
+    if(!m) return;
+    const drug = DA.formulary.drugs.find(d=>d.name.toLowerCase()===m[1].toLowerCase());
+    const step = m[2]+'mg '+m[3];
+    out.push({name:m[1], step, drug, stepIdx: drug? drug.ladder.indexOf(step) : -1});
+  });
+  return out;
+}
+function parseIntolerance(row){
+  return (row.drug_intolerance||'').split(';').map(s=>s.trim()).filter(Boolean).map(s=>{
+    const [d,r]=s.split('='); return {drug:(d||'').trim().toLowerCase(), reason:(r||'ไม่ระบุ').trim()};
+  });
+}
+function advisorFor(row, cls){
+  if(!DA) return null;
+  const sig = getFieldRaw(row,'sig_parse_status').value;
+  if(sig==='UNKNOWN') return {na:true, text: DA.sig_unknown_th};
+  const firedIds = cls.fired.map(f=>f.rule.id);
+  const inds = Object.keys(DA.advisor_triggers).filter(ind=>DA.advisor_triggers[ind].some(r=>firedIds.includes(r)));
+  if(!inds.length) return null;
+  const meds = parseMeds(row);
+  const intol = parseIntolerance(row);
+  const intolClasses = intol.map(i=>{ const d=DA.formulary.drugs.find(x=>x.id===i.drug||x.name.toLowerCase()===i.drug); return d?{cls:d.class, reason:i.reason, name:d.name}:null; }).filter(Boolean);
+  const sugg=[], blocked=[], warns=[], notes=[];
+  inds.forEach(ind=>{
+    const cur = meds.filter(m=>m.drug && m.drug.indication===ind);
+    const curKnown = meds.filter(m=>m.drug);
+    if(!cur.length){ notes.push('['+ind+'] '+DA.no_match_th); return; }
+    // 1) ยาเดิมยังขึ้นขั้นได้ → เสนอขั้นถัดไปแบบชัด (เช่น 500mg 1x2 → 850mg 1x2)
+    let stepped=false;
+    for(const m of cur){
+      if(m.stepIdx>=0 && m.stepIdx < m.drug.ladder.length-1){
+        if(!siteForm[m.drug.id]){ notes.push(m.drug.name+': ขั้นถัดไปมีในบันได แต่ไซต์นี้ไม่ได้ติ๊กว่ามียา — ข้าม'); continue; }
+        sugg.push({txt: m.drug.name+' <span class="advstep">'+m.step+' → '+m.drug.ladder[m.stepIdx+1]+'</span>', note: m.drug.note_th||''});
+        stepped=true; break;
+      }
+    }
+    // 2) ถึงขั้นสูงสุดแล้ว → เสนอเพิ่มยากลุ่มที่สองจากคลังที่ไซต์มี · บล็อกยาที่เคยหยุด · เตือนกลุ่มเดียวกัน
+    if(!stepped){
+      const candidates = DA.formulary.drugs.filter(d=>d.indication===ind && !cur.some(m=>m.drug.id===d.id));
+      let added=false;
+      for(const d of candidates){
+        const hit = intol.find(i=>i.drug===d.id||i.drug===d.name.toLowerCase());
+        if(hit){ blocked.push('❌ '+d.name+' — '+DA.intolerance_policy.same_drug_th+' "'+hit.reason+'"'); continue; }
+        if(!siteForm[d.id]){ notes.push(d.name+' ไม่มีในคลังยาไซต์นี้ — ข้าม'); continue; }
+        const clsHit = intolClasses.find(c=>c.cls===d.class);
+        if(clsHit) warns.push(DA.intolerance_policy.same_class_th+' ('+d.name+' — กลุ่ม '+d.class+' เดิมหยุด '+clsHit.name+' เพราะ '+clsHit.reason+')');
+        if(!added){ sugg.push({txt:'ยาเดิมถึงขั้นสูงสุดแล้ว → เพิ่มกลุ่มที่สอง: '+d.name+' <span class="advstep">'+d.ladder[0]+'</span>'+(clsHit?' ⚠️':''), note:d.note_th||''}); added=true; }
+      }
+      if(!added && !sugg.length) notes.push('['+ind+'] ไม่มีตัวเลือกที่เสนอได้ในคลังยาไซต์นี้ — ให้แพทย์สั่งเอง');
+    }
+  });
+  if(!sugg.length && !blocked.length && !notes.length) return null;
+  return {na:false, sugg, blocked, warns, notes, note: DA.note_th};
+}
+
+/* ══════════════════ ชิ้นส่วน UI ══════════════════ */
+function colorTh(c){ return c==='RED'?'แดง':c==='YELLOW'?'เหลือง':c==='GREEN'?'เขียว':c; }
+function qBadge(q){
+  if(q==='MD') return '<span class="badge md">🩺 คิวแพทย์</span>';
+  if(q==='SCHEDULE') return '<span class="badge sch">📅 ถึงรอบตรวจ</span>';
+  if(q==='MEASURE') return '<span class="badge msr">🩸 วัดที่จุดคัดกรอง</span>';
+  if(q==='FLOW') return '<span class="badge wait">flow เดิม</span>';
+  if(q==='พบแพทย์วันนี้') return '<span class="badge md">⛔ พบแพทย์วันนี้</span>';
+  if(q==='ห้องยา') return '<span class="badge ok">💊 ห้องยา</span>';
+  return '<span class="badge wait">'+q+'</span>';
+}
+function fchip(st){
+  if(!st) return '';
+  let cls='ok', txt=st.fdef.label_th+' ';
+  if(st.value===null&&st.status==='MISSING'){ txt+='ไม่มีค่า'; cls='bad'; }
+  else if(st.status==='PARSE_ERR'||st.status==='NO_DATE'){ txt+=st.note; cls='bad'; }
+  else{
+    txt+='<b>'+st.value+'</b>'+(st.fdef.unit?' '+st.fdef.unit:'');
+    if(st.age!==null&&st.age>0) txt+=' <span class="dim">('+st.age+'วัน)</span>';
+    if(st.status==='IN_GRACE') cls='warn';
+    if(st.status==='BEYOND'||st.status==='STALE_VISIT') cls='bad';
+  }
+  return '<span class="fchip '+cls+'">'+txt+'</span>';
+}
+function allCases(){ return rawRows.map(row=>({row, cls:classify(row)})); }
+function sumStrip(counts){
+  return '<div class="sumstrip">'+counts.map(c=>'<div class="sum '+(c.cls||'')+'"><b>'+c.n+'</b>'+c.label+'</div>').join('')+'</div>';
+}
+function caseOpenAttr(hn, autoOpen){ return (openCases.has(hn)||autoOpen)?' open':''; }
+function rememberToggle(el, hn){ if(el.open) openCases.add(hn); else openCases.delete(hn); }
+
+/* ── คีย์ค่าที่จุดคัดกรอง (POC — คิว MEASURE ตาม D12) ── */
+function baseRefDate(){ return document.getElementById('refDate').value || BUILD_INFO.default_ref_date; }
+function nowHM(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function saveManual(hn, by){
+  const row = rawRows.find(r=>r.hn===hn); if(!row) return;
+  const inputs = document.querySelectorAll('input.poc[data-hn="'+hn+'"]');
+  let touched=false;
+  inputs.forEach(inp=>{
+    const val=inp.value.trim(); if(val==='') return;
+    const fname=inp.dataset.f;
+    const fdef=CATALOG.find(f=>f.name===fname);
+    manualEdits[hn] = manualEdits[hn]||{};
+    manualEdits[hn][fname] = {value:val, at:nowHM(), by, prev:(row[fname]||'—')};
+    if(fdef&&fdef.date_field){ // ค่าวัดใหม่ = วันนี้ (วันอ้างอิงฐาน ไม่ใช่วันที่ถูกเลื่อนโดยฉากจำลอง)
+      manualEdits[hn][fdef.date_field] = {value:baseRefDate(), at:nowHM(), by, prev:(row[fdef.date_field]||'—')};
+    }
+    touched=true;
+  });
+  if(touched){ openCases.add(hn); renderAll(); }
+}
+function clearManual(hn){ delete manualEdits[hn]; renderAll(); }
+function pocForm(row, roleLabel){
+  const editable = CATALOG.filter(f=>f.poc_editable);
+  if(!editable.length) return '';
+  const me = manualEdits[row.hn];
+  let h='<div class="pocform"><b class="small dim">วัดซ้ำ / คีย์ค่าที่จุดคัดกรอง</b> ';
+  editable.forEach(f=>{
+    h+='<label>'+f.label_th+' <input class="poc" type="number" step="any" data-hn="'+row.hn+'" data-f="'+f.name+'" placeholder="'+(getFieldRaw(row,f.name).value??'—')+'"></label> ';
+  });
+  h+='<button class="primary" onclick="saveManual(\''+row.hn+'\',\''+roleLabel+'\')">บันทึก</button>';
+  h+='<span class="dim" style="font-size:11.5px;margin-left:8px">บันทึกในระบบเรา + ประทับเวลา/ผู้คีย์ · ไม่เขียนกลับ HOSxP (เฟสสาธิต) · ระบบจัดสีใหม่ทันที</span>';
+  if(me){
+    const parts = Object.entries(me).filter(([k])=>!k.endsWith('_date')).map(([k,v])=>{
+      const fd=CATALOG.find(f=>f.name===k);
+      return (fd?fd.label_th:k)+' '+v.value+' <span class="dim">(เดิม '+v.prev+' · '+v.at+' '+v.by+')</span>';
+    });
+    h+='<div class="pocdone">✏️ คีย์หน้างานแล้ว: '+parts.join(' · ')+' <button onclick="clearManual(\''+row.hn+'\')" style="font-size:11px;padding:1px 8px">ล้างค่าที่คีย์</button></div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+/* ── การเรียง ── */
+function checkinOf(row){ return (getFieldRaw(row,'checkin_time').value||'99:99'); }
+function sortItems(items, mode){
+  const pri = {red:{RED:0,YELLOW:1,GREEN:2}, yellow:{YELLOW:0,RED:1,GREEN:2}, green:{GREEN:0,YELLOW:1,RED:2}};
+  const arr=[...items];
+  if(mode==='arrival') arr.sort((a,b)=>checkinOf(a.row).localeCompare(checkinOf(b.row)));
+  else if(pri[mode]) arr.sort((a,b)=>(pri[mode][a.cls.color]-pri[mode][b.cls.color]) || checkinOf(a.row).localeCompare(checkinOf(b.row)));
+  else arr.sort((a,b)=>String(a.row.hn).localeCompare(String(b.row.hn)));
+  return arr;
+}
+function sortSelect(id, cur, onchange){
+  const opts=[['arrival','🕐 ตามเวลามาถึง'],['red','🔴 แดงก่อน'],['yellow','🟡 เหลืองก่อน'],['green','🟢 เขียวก่อน'],['hn','เลข HN']];
+  return '<label class="dim small">เรียง: </label><select onchange="'+onchange+'">'
+    +opts.map(([v,l])=>'<option value="'+v+'"'+(v===cur?' selected':'')+'>'+l+'</option>').join('')+'</select>';
+}
+
+/* ══════════════════ พยาบาล · วันเจาะ ══════════════════ */
+function nurseTasks(row, cls){
+  const t={pending:[], done:[], draw:[]};
+  CATALOG.filter(f=>f.panel==='visit'&&requiredFor(f,row)).forEach(f=>{
+    const st=cls.states[f.name];
+    if(st.status==='FRESH') t.done.push(f.label_th+' '+st.value+(f.unit?' '+f.unit:''));
+    else t.pending.push('วัด/เจาะ '+f.label_th);
+  });
+  CATALOG.filter(f=>f.panel==='annual'&&requiredFor(f,row)).forEach(f=>{
+    const st=cls.states[f.name];
+    if(['IN_GRACE','BEYOND','MISSING','NO_DATE'].includes(st.status))
+      t.draw.push('เจาะ '+f.label_th+(st.status==='MISSING'?' (ไม่เคยมีผล)':' ('+(st.note||'ถึงรอบ')+')'));
+  });
+  return t;
+}
+function renderNurse(){
+  const el=document.getElementById('pgNurse');
+  const all=allCases();
+  const items=all.filter(i=>matchesSearch(i.row));
+  const nRed = items.filter(i=>i.cls.fired.some(f=>f.rule.result==='RED')).length;
+  let nTask=0, nPre=0;
+  const built = items.map(({row,cls})=>{
+    const t=nurseTasks(row,cls), q=questionsFor(row,cls);
+    if(t.pending.length||t.draw.length) nTask++;
+    if(q.triggered.some(x=>x.layer==='PREEMPTIVE')) nPre++;
+    return {row,cls,t,q};
+  });
+  let h=sumStrip([
+    {n:items.length,label:'เคสนัดวันนี้',cls:'b'},
+    {n:nRed,label:'ธงแดง — พบแพทย์ก่อนกลับ',cls:'r'},
+    {n:nTask,label:'มีงานค้างเจาะ/วัด',cls:'y'},
+    {n:nPre,label:'มีคำถามต้องดักก่อนกลับ ★',cls:'g'},
+  ]);
+  h+='<p class="hint">'+sortSelect('sortNurse', nurseSort, "nurseSort=this.value;renderAll()")+' &nbsp;·&nbsp; กดที่เคสเพื่อดูงาน + คำถาม · ★ = ต้องถามก่อนผู้ป่วยกลับ · คำถามยังเป็นชุด candidate รอ med lead/พยาบาลรับรอง</p>';
+  if(RULES_DEMO.question_prompts.f13_note_th) h+='<p class="hint">🔶 '+RULES_DEMO.question_prompts.f13_note_th+'</p>';
+  h+=searchNote(items.length, all.length);
+  sortItems(built, nurseSort).forEach(({row,cls,t,q})=>{
+    const redNow = cls.fired.filter(f=>f.rule.result==='RED');
+    const hasPre = q.triggered.some(x=>x.layer==='PREEMPTIVE');
+    // ขอบ+chip = สีคลินิกจากข้อมูลที่มีตอนนี้ (VETO รอบ 27: ห้ามใช้ palette สีคลินิกสื่อสถานะงาน และพยาบาลต้องเห็นผลหลังคีย์วัดซ้ำทันที)
+    h+='<details id="ncase-'+row.hn+'" class="case '+cls.color+'"'+caseOpenAttr(row.hn, redNow.length>0)+' ontoggle="rememberToggle(this,\''+row.hn+'\')">';
+    h+='<summary><span class="arrv">🕐 '+(getFieldRaw(row,'checkin_time').value||'—')+'</span><span class="who"><b>'+row.hn+'</b> <span class="nm">'+(row.full_name||'')+'</span></span>';
+    h+='<span class="cellDx">'+(getFieldRaw(row,'dx_dm').value?'<span class="dxc">DM</span>':'')+(getFieldRaw(row,'dx_ht').value?'<span class="dxc">HT</span>':'')+'</span>';
+    h+='<span class="cellB">';
+    h+='<span class="chip '+cls.color+'" title="สถานะจากข้อมูลที่มีตอนนี้ — สรุปจริงเมื่อผลแลปออก">'+colorTh(cls.color)+'</span>';
+    if(cls.color!=='RED') h+=qBadge(cls.queueMain);
+    if(manualEdits[row.hn]) h+='<span class="badge task">✏️ คีย์แล้ว</span>';
+    if(redNow.length) h+='<span class="badge md">⛔ พบแพทย์ก่อนกลับ</span>';
+    if(t.pending.length+t.draw.length) h+='<span class="badge task">🧪 งาน '+(t.pending.length+t.draw.length)+'</span>';
+    h+='<span class="badge ask">💬 ถาม '+(q.minimum.length+q.triggered.length)+'</span>';
+    if(hasPre) h+='<span class="badge pre">★ ดักก่อนกลับ</span>';
+    h+='</span><span class="arrow">▶</span></summary><div class="body">';
+    redNow.forEach(f=>{ h+='<div class="redline">⛔ '+f.reason+'</div>'; });
+    h+='<div style="display:flex;gap:24px;flex-wrap:wrap">';
+    // งาน
+    h+='<div style="min-width:230px"><b class="small dim">งานวันนี้</b><div class="cklist">';
+    t.pending.forEach(x=>h+='<div class="ck"><span class="box">⬜</span><b>'+x+'</b></div>');
+    t.draw.forEach(x=>h+='<div class="ck"><span class="box">⬜</span><b>'+x+'</b></div>');
+    t.done.forEach(x=>h+='<div class="ck done"><span class="box">✅</span>'+x+'</div>');
+    h+='</div></div>';
+    // คำถาม — checklist สั้น กดกางประโยคเต็ม
+    h+='<div style="flex:1;min-width:260px"><b class="small dim">คำถาม (กดดูประโยคเต็ม)</b><div class="cklist">';
+    q.triggered.forEach(x=>{
+      h+='<details class="q"><summary><span class="box">⬜</span><b>'+(x.layer==='PREEMPTIVE'?'<span class="star">★</span> ':'')+x.short_th+'</b><span class="exp">▾</span></summary>'
+        +'<div class="full">“'+x.ask_th+'”<br><span class="dim">'+(x.why_th||'')+(x.cpg_ref?' · อ้างอิง: '+x.cpg_ref:'')+'</span></div></details>';
+    });
+    h+='<details class="q"><summary><span class="box">⬜</span>คำถามพื้นฐานทุกคน ('+q.minimum.length+')<span class="exp">▾</span></summary><div class="full">'
+      +q.minimum.map(m=>'• <b>'+m.short_th+'</b> — '+m.ask_th).join('<br>')+'</div></details>';
+    h+='</div></div>';
+    // สถานะคลินิก ณ ตอนนี้ + เหตุผล + ค่าพร้อมอายุ + ยา (VETO/WARN รอบ 27 — constraint 4/6, D8, flow §4 ขั้น 1)
+    h+='<div style="margin-top:8px"><b class="small dim">สถานะ ณ ตอนนี้ (ข้อมูลเท่าที่มี — สรุปจริงเมื่อผลแลปออก)</b>';
+    cls.fired.forEach(f=>h+='<div class="reason">• '+f.reason+' <span class="src">['+f.rule.id+']</span></div>');
+    cls.flags.forEach(f=>h+='<div class="reason">🚩 '+f.text+'</div>');
+    if(!cls.fired.length&&!cls.flags.length) h+='<div class="reason dim">ยังไม่มีกฎใด fire จากข้อมูลที่มี</div>';
+    h+='<div style="margin-top:4px">'+CATALOG.filter(f=>['number','enum'].includes(f.type)&&f.name!=='meds_raw').map(f=>(cls.states[f.name]&&(cls.states[f.name].value!==null||requiredFor(f,row)))?fchip(cls.states[f.name]):'').join('')+'</div>';
+    h+='<div class="meds">💊 '+(row.meds_raw||'—')+'</div></div>';
+    h+=pocForm(row,'พยาบาล')+'</div></details>';
+  });
+  el.innerHTML=h;
+}
+
+/* ══════════════════ แพทย์ · คิวรีวิว ══════════════════ */
+function renderDoc(){
+  const el=document.getElementById('pgDoc');
+  const all=allCases();
+  const items=all.filter(i=>matchesSearch(i.row));
+  const mode=document.getElementById('rulesetSel').value;
+  const queue = items.filter(i=>i.cls.color==='RED'||(i.cls.color==='YELLOW'&&i.cls.queueMain==='MD'));
+  const nRed=queue.filter(i=>i.cls.color==='RED').length;
+  let h=sumStrip([
+    {n:nRed,label:'แดง — พบวันนี้',cls:'r'},
+    {n:queue.length-nRed,label:'เหลือง คิวแพทย์ (รีวิว async)',cls:'y'},
+    {n:items.length-queue.length,label:'ไม่กินเวลาแพทย์ (เขียว/ธงสถานะ)',cls:'g'},
+  ]);
+  h+='<p class="hint">'+sortSelect('sortDoc', docSort, "docSort=this.value;renderAll()")+' &nbsp;·&nbsp; เห็นเฉพาะเคสที่ต้องใช้ดุลยพินิจแพทย์ (D13/D14: เหลืองคิวอื่นไม่ขึ้นหน้านี้) · ทุกแถวมีตัวเลขที่กฎใช้ตัดสิน</p>';
+  if(mode==='REAL') h+='<div class="card">โหมดกฎจริง: ทุกกฎยังปิด ทุกเคสใช้ flow เดิม (แพทย์ตรวจทุกเคสตามปกติ) — คิวด้านล่างจึงว่าง</div>';
+  h+=searchNote(items.length, all.length);
+  if(!queue.length&&mode!=='REAL') h+='<div class="card dim">ไม่มีเคสในคิวแพทย์'+(searchQ?' ที่ตรงคำค้น':'')+'</div>';
+  sortItems(queue, docSort).forEach(({row,cls})=>{
+    const adv=advisorFor(row,cls);
+    h+='<details id="dcase-'+row.hn+'" class="case '+cls.color+'"'+caseOpenAttr(row.hn,false)+' ontoggle="rememberToggle(this,\''+row.hn+'\')">';
+    h+='<summary><span class="arrv">🕐 '+(getFieldRaw(row,'checkin_time').value||'—')+'</span><span class="chip '+cls.color+'">'+colorTh(cls.color)+'</span><span class="who"><b>'+row.hn+'</b> <span class="nm">'+(row.full_name||'')+'</span></span>';
+    h+='<span class="cellDx">'+(getFieldRaw(row,'dx_dm').value?'<span class="dxc">DM</span>':'')+(getFieldRaw(row,'dx_ht').value?'<span class="dxc">HT</span>':'')+'</span>';
+    const first = cls.fired[0]? cls.fired[0].reason : (cls.flags[0]?cls.flags[0].text:'');
+    h+='<span class="cellReason small" style="color:#41566b">'+first+'</span>';
+    h+='<span class="arrow">▶</span></summary><div class="body">';
+    h+='<b class="small dim">เหตุผลทั้งหมด (ทุกกฎที่ fire)</b>';
+    cls.fired.forEach(f=>h+='<div class="reason">• '+f.reason+' <span class="src">['+f.rule.id+']</span></div>');
+    cls.flags.forEach(f=>h+='<div class="reason">🚩 '+f.text+'</div>');
+    h+='<div style="margin-top:6px">'+CATALOG.filter(f=>['number','enum'].includes(f.type)&&f.name!=='meds_raw').map(f=>(cls.states[f.name]&&(cls.states[f.name].value!==null||requiredFor(f,row)))?fchip(cls.states[f.name]):'').join('')+'</div>';
+    h+='<div class="meds">💊 ยาปัจจุบัน: '+(row.meds_raw||'—')+'</div>';
+    if(adv){
+      if(adv.na) h+='<div class="adv na"><span class="ttl">DRUG ADVISOR</span><br>'+adv.text+'</div>';
+      else{
+        h+='<div class="adv"><span class="ttl">DRUG ADVISOR — ข้อเสนอ (ตัวอย่างกลไก · แพทย์ตัดสิน ระบบไม่สั่งยา)</span>';
+        adv.sugg.forEach(s=>h+='<div>• '+s.txt+(s.note?' <span class="dim small">('+s.note+')</span>':'')+'</div>');
+        adv.blocked.forEach(b=>h+='<div class="advblock">'+b+'</div>');
+        adv.warns.forEach(w=>h+='<div class="advwarn">'+w+'</div>');
+        adv.notes.forEach(n=>h+='<div class="dim small">'+n+'</div>');
+        h+='<div class="dim small" style="margin-top:3px">'+adv.note+'</div></div>';
+      }
+    }
+    h+=pocForm(row,'แพทย์');
+    h+='<div style="margin-top:8px"><button class="sketchbtn">อนุมัติส่งห้องยา</button><button class="sketchbtn" style="margin-left:6px">นัดพบ/แก้คำสั่ง</button><span class="sketchtag">ภาพร่าง — demo อ่านอย่างเดียว ยังไม่มีความสามารถนี้</span></div>';
+    h+='</div></details>';
+  });
+  el.innerHTML=h;
+}
+
+/* ══════════════════ เภสัช · ห้องยา (v2 — งานจ่ายยาเป็นแกน ไม่ปนเคสรอแพทย์) ══════════════════ */
+const PH = RULES_DEMO.pharmacy;
+const pharmState = {};   // {hn:{channel, appt, status, pinned, log:[]}} — สถานะงานห้องยา (demo-local)
+let pharmSort = 'runout';   // runout | appt | status | custom(ปักหมุดก่อน)
+let pharmView = 'work';     // work = งานจ่ายยา (จัดการได้) | plan = กระดานวางแผน (ดูเฉยๆ)
+function seedPharmChannels(){
+  // demo เท่านั้น: กระจายช่องทางให้กระดานวางแผนมีของดู (ของจริงมาจากที่เภสัชตั้งไว้/ค่าที่ตกลงกับผู้ป่วย)
+  rawRows.forEach(r=>{
+    if(pharmState[r.hn]) return;
+    const d = Number(String(r.hn).slice(-1));
+    getPS(r.hn).channel = (d===4||d===9)?'MAIL' : (d===2||d===7)?'PROXY' : 'PICKUP';
+  });
+}
+function getPS(hn){
+  if(!pharmState[hn]) pharmState[hn]={channel:'PICKUP', appt:'', status:'WAIT_PREP', pinned:false, log:[]};
+  return pharmState[hn];
+}
+function setPS(hn,k,v){ const s=getPS(hn); s[k]=v; s.log.push(k+'='+v+' @'+nowHM()); renderAll(); }
+/* เข้าคิวจ่ายได้ต่อเมื่อ: เขียว หรือ เหลืองที่ธงทุกตัวเป็น SCHEDULE เท่านั้น
+   ห้ามตัดสินจาก queueMain ตัวเดียว — VETO รอบ 27: เคส MEASURE+SCHEDULE เคยรั่วเข้าคิวจ่ายเพราะ queueMain เลือก SCHEDULE */
+function canDispense(cls){
+  return cls.color==='GREEN' || (cls.color==='YELLOW' && cls.queues.length>0 && cls.queues.every(q=>q==='SCHEDULE'));
+}
+function pharmSubTabs(){
+  return '<div class="subtabs">'
+    +'<button class="'+(pharmView==='work'?'on':'')+'" onclick="pharmView=\'work\';renderAll()">🛠 งานจ่ายยา</button>'
+    +'<button class="'+(pharmView==='plan'?'on':'')+'" onclick="pharmView=\'plan\';renderAll()">📊 กระดานวางแผน (ดูอย่างเดียว)</button>'
+    +'</div>';
+}
+function renderPharm(){
+  seedPharmChannels();
+  if(pharmView==='plan'){ renderPharmPlan(); return; }
+  const el=document.getElementById('pgPharm');
+  const all=allCases();
+  const items=all.filter(i=>matchesSearch(i.row));
+  const rd=refDateStr();
+  const rows = items.map(({row,cls})=>({row, cls, runout: row.med_runout_date? daysBetween(row.med_runout_date, rd) : null, ps:getPS(row.hn)}));
+  // แบ่งงาน: จ่ายได้ vs ยังจ่ายไม่ได้ (รอปิดเงื่อนไขจากคนอื่น — ไม่ใช่งานเภสัช)
+  const dispQ = rows.filter(r=>canDispense(r.cls));
+  const blocked = rows.filter(r=>!dispQ.includes(r));
+  const active = dispQ.filter(r=>!['HANDED','ESCALATED'].includes(r.ps.status));
+  const nCrit = active.filter(r=>r.runout!==null&&r.runout<=2).length;
+  const nPrep = active.filter(r=>r.ps.status==='PREPPED').length;
+  const nRet  = dispQ.filter(r=>r.ps.status==='RETURNED').length;
+  let h=pharmSubTabs();
+  h+=sumStrip([
+    {n:active.length,label:'คิวจ่ายวันนี้',cls:'g'},
+    {n:nCrit,label:'ยาหมดใน ≤2 วัน — เสี่ยงขาดยา',cls:'r'},
+    {n:nPrep,label:'จัดแล้ว รอจ่าย',cls:'b'},
+    {n:nRet,label:'ไม่มารับ — ต้องตามตัว',cls:'y'},
+  ]);
+  const sortOpts=[['runout','💊 วันยาหมดใกล้สุด'],['appt','📅 ตามนัดรับ'],['status','ตามสถานะงาน'],['custom','⭐ คิวที่จัดเอง (ปักหมุดก่อน)']];
+  h+='<p class="hint"><label class="dim small">เรียง: </label><select onchange="pharmSort=this.value;renderAll()">'
+    +sortOpts.map(([v,l])=>'<option value="'+v+'"'+(v===pharmSort?' selected':'')+'>'+l+'</option>').join('')+'</select>'
+    +' &nbsp;·&nbsp; หน้านี้คืองานจ่ายยา — เคสที่รอแพทย์/รอวัดอยู่ท้ายหน้าไว้วางแผนสต๊อกเท่านั้น</p>';
+  // ── คิวจ่ายวันนี้ ──
+  h+='<div class="card" style="border-left:5px solid var(--green)"><b>คิวจ่ายวันนี้ ('+dispQ.length+')</b> <span class="dim small">เขียว = จ่ายโดยไม่พบแพทย์ · ธงถึงรอบตรวจ = จ่ายได้แต่แจ้งนัดเจาะ</span></div>';
+  const stOrder={WAIT_PREP:0,PREPPED:1,RETURNED:2,ESCALATED:3,HANDED:4};
+  const doneSt=s=>stOrder[s]>=3;
+  const sorted=[...dispQ];
+  if(pharmSort==='runout') sorted.sort((a,b)=>doneSt(a.ps.status)-doneSt(b.ps.status) || (a.runout??99)-(b.runout??99));
+  else if(pharmSort==='appt') sorted.sort((a,b)=>(a.ps.appt||'9999').localeCompare(b.ps.appt||'9999'));
+  else if(pharmSort==='status') sorted.sort((a,b)=>stOrder[a.ps.status]-stOrder[b.ps.status] || (a.runout??99)-(b.runout??99));
+  else sorted.sort((a,b)=>(b.ps.pinned-a.ps.pinned) || (a.runout??99)-(b.runout??99));
+  h+=searchNote(items.length, all.length);
+  sorted.forEach(({row,cls,runout,ps})=>{
+    const rocls = runout===null?'':(runout<=2?'crit':(runout<=5?'soon':''));
+    const done = ps.status==='HANDED';
+    h+='<details id="pcase-'+row.hn+'" class="case '+cls.color+'"'+caseOpenAttr(row.hn,false)+' ontoggle="rememberToggle(this,\''+row.hn+'\')" style="'+(done?'opacity:.55':'')+'">';
+    h+='<summary>';
+    h+='<button class="pinbtn'+(ps.pinned?' on':'')+'" onclick="event.preventDefault();setPS(\''+row.hn+'\',\'pinned\','+(!ps.pinned)+')" title="ปักขึ้นคิวด่วน">'+(ps.pinned?'⭐':'☆')+'</button>';
+    h+='<span class="runout '+rocls+'">'+(runout===null?'—':('ยาหมด '+runout+' วัน'))+'</span>';
+    h+='<span class="who"><b>'+row.hn+'</b> <span class="nm">'+(row.full_name||'')+'</span></span>';
+    h+='<span class="cellFlags">'+(cls.queueMain==='SCHEDULE'?'<span class="badge sch">📅 แจ้งนัดเจาะด้วย</span>':'')+'</span>';
+    // ช่องทาง + นัดรับ + สถานะ — inline ทำงานเร็ว ไม่ต้องกาง
+    h+='<span class="phctl" onclick="event.preventDefault()">';
+    h+='ช่องทาง <select onchange="setPS(\''+row.hn+'\',\'channel\',this.value)">'+PH.channels.map(c=>'<option value="'+c.id+'"'+(ps.channel===c.id?' selected':'')+'>'+c.label_th+'</option>').join('')+'</select> ';
+    h+='นัดรับ <input type="date" value="'+ps.appt+'" onchange="setPS(\''+row.hn+'\',\'appt\',this.value)"> ';
+    if(ps.status==='WAIT_PREP') h+='<span class="badge wait">รอจัดยา</span> <button onclick="setPS(\''+row.hn+'\',\'status\',\'PREPPED\')">จัดแล้ว</button> <button onclick="setPS(\''+row.hn+'\',\'status\',\'ESCALATED\')" title="เจอปัญหา — ส่งออกจากคิวจ่ายไปปรึกษาแพทย์ (ทางออกที่ 3 ตามรอบ 9)">ส่งปรึกษาแพทย์</button>';
+    else if(ps.status==='PREPPED') h+='<span class="badge msr">จัดแล้ว รอจ่าย</span> <button class="primary" onclick="setPS(\''+row.hn+'\',\'status\',\'HANDED\')">จ่ายแล้ว</button> <button onclick="setPS(\''+row.hn+'\',\'status\',\'RETURNED\')">ไม่มารับ</button> <button onclick="setPS(\''+row.hn+'\',\'status\',\'ESCALATED\')">ส่งปรึกษาแพทย์</button>';
+    else if(ps.status==='HANDED') h+='<span class="badge ok">✅ จ่ายแล้ว — ปิดรอบ</span>';
+    else if(ps.status==='ESCALATED') h+='<span class="badge md">🩺 ส่งปรึกษาแพทย์แล้ว — ออกจากคิวจ่าย</span> <button onclick="setPS(\''+row.hn+'\',\'status\',\'WAIT_PREP\')">แพทย์เคลียร์แล้ว กลับเข้าคิว</button>';
+    else if(ps.status==='RETURNED') h+='<span class="badge md">↩ ไม่มารับ — คืนสต๊อก+ตามตัว</span> <button onclick="setPS(\''+row.hn+'\',\'status\',\'PREPPED\')">ติดต่อได้ กลับรอจ่าย</button>';
+    h+='</span><span class="arrow">▶</span></summary><div class="body">';
+    h+='<div class="meds">💊 '+(row.meds_raw||'—')+'</div>';
+    h+='<div class="small"><b class="dim">เหตุผลที่จ่ายได้ (ทุกกฎ/ธง):</b>';
+    cls.fired.forEach(f=>h+='<div class="reason">• '+f.reason+' <span class="src">['+f.rule.id+']</span></div>');
+    cls.flags.forEach(f=>h+='<div class="reason">🚩 '+f.text+'</div>');
+    h+='</div>';
+    if(ps.log.length) h+='<div class="small dim" style="margin-top:4px">ประวัติงาน: '+ps.log.join(' · ')+'</div>';
+    h+='</div></details>';
+  });
+  if(!dispQ.length) h+='<div class="card dim">ยังไม่มีเคสจ่ายได้ (โหมดกฎจริง: ทุกเคสรอ flow เดิม)</div>';
+  h+='<p class="hint">สถานะงาน/ช่องทาง/นัดรับ เก็บในเซสชันสาธิตเท่านั้น ไม่บันทึกถาวร — ระบบจริงจะบันทึกพร้อม audit log</p>';
+  // ── ยังจ่ายไม่ได้ — ไว้วางแผนสต๊อกเท่านั้น ──
+  h+='<details id="pharmBlocked" class="card" style="margin-top:14px"><summary style="cursor:pointer"><b>ยังจ่ายไม่ได้ — รอปิดเงื่อนไขจากทีมอื่น ('+blocked.length+')</b> <span class="dim small">ไม่ใช่งานห้องยา · เปิดดูไว้วางแผนสต๊อก/ไปรษณีย์ล่วงหน้า</span></summary>';
+  h+='<table style="margin-top:8px"><tr><th>ยาหมดใน</th><th>HN</th><th>ติดอะไรอยู่</th></tr>';
+  blocked.sort((a,b)=>(a.runout??99)-(b.runout??99)).forEach(({row,cls,runout})=>{
+    let why = cls.color==='RED'?'⛔ พบแพทย์วันนี้':(cls.queueMain==='MD'?'🩺 รอแพทย์รีวิว':(cls.queueMain==='MEASURE'?'🩸 รอวัด/เจาะเพิ่ม':'flow เดิม'));
+    h+='<tr id="bcase-'+row.hn+'"><td class="runout '+(runout!==null&&runout<=2?'crit':'')+'">'+(runout===null?'—':runout+' วัน')+'</td><td><b>'+row.hn+'</b> <span class="small dim">'+(row.full_name||'')+'</span></td><td>'+why+'</td></tr>';
+  });
+  h+='</table></details>';
+  const mailNote = PH.channels.find(c=>c.id==='MAIL');
+  if(mailNote&&mailNote.note_th) h+='<p class="hint" style="margin-top:8px">'+mailNote.note_th+'</p>';
+  el.innerHTML=h;
+}
+
+/* กระดานวางแผนเภสัช — อ่านอย่างเดียว · แบ่งคอลัมน์ตามช่องทาง · โชว์แค่เหลือกี่วัน · ไว้บริหารกำลังคน/วางแผนจัดยา */
+function renderPharmPlan(){
+  const el=document.getElementById('pgPharm');
+  const rd=refDateStr();
+  const allRows = allCases();
+  const rows = allRows.filter(i=>matchesSearch(i.row)).map(({row,cls})=>({row, cls, runout: row.med_runout_date? daysBetween(row.med_runout_date, rd) : null, ps:getPS(row.hn)}));
+  const nCrit = rows.filter(r=>r.runout!==null&&r.runout<=2&&r.ps.status!=='HANDED').length;
+  let h=pharmSubTabs();
+  h+=searchNote(rows.length, allRows.length);
+  h+=sumStrip([
+    {n:rows.length,label:'ผู้ป่วยทั้งหมดในรอบ',cls:'b'},
+    {n:nCrit,label:'ยาหมดใน ≤2 วัน',cls:'r'},
+    ...PH.channels.map(c=>({n:rows.filter(r=>r.ps.channel===c.id).length,label:c.label_th,cls:'g'})),
+  ]);
+  h+='<p class="hint">อ่านอย่างเดียว — เรียงตามวันยาหมดใกล้สุดในแต่ละช่องทาง · 🟢 พร้อมจัด · ⏳ รอผลจากทีมอื่น · ✅ จ่ายแล้ว · ↩ ไม่มารับ</p>';
+  h+='<div class="plancols">';
+  PH.channels.forEach(c=>{
+    const list = rows.filter(r=>r.ps.channel===c.id).sort((a,b)=>(a.runout??99)-(b.runout??99));
+    const crit = list.filter(r=>r.runout!==null&&r.runout<=2&&r.ps.status!=='HANDED').length;
+    h+='<div class="plancol"><div class="planhead">'+c.label_th+' <span class="dim">('+list.length+')</span>'
+      +(crit?'<span class="badge md" style="margin-left:auto">≤2 วัน · '+crit+'</span>':'')+'</div>';
+    list.forEach(({row,cls,runout,ps})=>{
+      const ready = canDispense(cls);
+      const mark = ps.status==='HANDED'?'✅':ps.status==='RETURNED'?'↩':ps.status==='ESCALATED'?'🩺':(ready?'🟢':'⏳');
+      const ucls = ps.status==='HANDED'?'done':(runout!==null&&runout<=2?'crit':(runout!==null&&runout<=5?'soon':''));
+      h+='<div class="planrow '+ucls+'" onclick="jumpToCase(\''+row.hn+'\')" title="กดเพื่อไปจัดการเคสนี้ในหน้างานจ่ายยา"><span class="pdays">'+(runout===null?'—':runout+' วัน')+'</span>'
+        +'<span class="pwho"><b>'+row.hn+'</b> '+(row.full_name||'').replace(' (สมมติ)','')+'</span>'
+        +'<span class="pmark">'+mark+'</span></div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+  const mailNote = PH.channels.find(x=>x.id==='MAIL');
+  if(mailNote&&mailNote.note_th) h+='<p class="hint" style="margin-top:10px">'+mailNote.note_th+'</p>';
+  el.innerHTML=h;
+}
+
+/* ══════════════════ IT trace ══════════════════ */
+function renderIT(){
+  const el=document.getElementById('pgIT');
+  const items=allCases();
+  if(!itSelectedHn && items.length) itSelectedHn=items[0].row.hn;
+  let h='<div class="card"><b>Connector trace</b> — ค่านี้มาจากไหน แปลงอย่างไร อายุเท่าไร · ทางเข้าไฟล์กับ connector ผ่าน field catalog + validation ตัวเดียวกัน</div>';
+  h+='<div class="card">เลือกเคส: <select id="itSel" onchange="itSelectedHn=this.value;renderIT()">'+items.map(i=>'<option value="'+i.row.hn+'" '+(i.row.hn===itSelectedHn?'selected':'')+'>'+i.row.hn+' '+(i.row.full_name||'')+'</option>').join('')+'</select>'
+    +' <span class="dim small">แหล่งข้อมูล: '+srcInfo.label+'</span></div>';
+  const item=items.find(i=>i.row.hn===itSelectedHn);
+  if(item){
+    h+='<div class="card"><b>Field trace</b><table><tr><th>field (catalog)</th><th>แหล่ง</th><th>ค่าดิบ</th><th>ค่าหลังแปลง</th><th>วันที่</th><th>อายุ (วัน)</th><th>สถานะ</th></tr>';
+    CATALOG.forEach(f=>{
+      const st=item.cls.states[f.name];
+      let src = (item.row.__cols||[]).includes(f.name)? srcInfo.kind+' คอลัมน์ "'+f.name+'"' : '<span class="dim">ไม่มีในแหล่งข้อมูล</span>';
+      if(st.manual) src = '<b style="color:var(--blue)">✏️ คีย์หน้างาน</b> '+st.manual.at+' ('+st.manual.by+')<br><span class="dim">ทับค่าเดิม: '+st.manual.prev+'</span>';
+      h+='<tr><td><b>'+f.name+'</b><br><span class="small dim">'+f.label_th+(f.unit?' ('+f.unit+')':'')+'</span></td><td class="small">'+src+'</td>'
+        +'<td>'+(st.raw===''||st.raw===undefined?'<span class="dim">ว่าง</span>':st.raw)+'</td>'
+        +'<td>'+(st.value===null?'<span class="dim">null → UNDETERMINED</span>':String(st.value))+'</td>'
+        +'<td>'+(st.date||'—')+'</td><td>'+(st.age===null?'—':st.age)+'</td>'
+        +'<td>'+st.status+(st.note?'<br><span class="small dim">'+st.note+'</span>':'')+'</td></tr>';
+    });
+    h+='</table></div>';
+    h+='<div class="card"><b>Rule trace</b>';
+    if(item.cls.mode==='REAL') h+='<div class="dim">โหมดกฎจริง: ทุกกฎ DO_NOT_EVALUATE — ดูรายชื่อในแท็บ กฎ/Admin</div>';
+    else{
+      h+='<table><tr><th>กฎ</th><th>ผล</th><th>เงื่อนไข</th></tr>';
+      item.cls.trace.forEach(t=>{
+        h+='<tr><td><b>'+t.rule.id+'</b><br><span class="small dim">'+t.rule.result+(t.rule.queue?' → '+t.rule.queue:'')+'</span></td>'
+          +'<td>'+(t.result===T?'<b style="color:var(--red)">FIRE</b>':t.result)+'</td>'
+          +'<td class="small">'+t.leaf.map(l=>(l.cond.field||l.special||'')+' '+(l.cond.op||'')+' '+JSON.stringify(l.cond.value!==undefined?l.cond.value:'')+' → '+l.result).join('<br>')+'</td></tr>';
+      });
+      h+='</table>';
+    }
+    h+='</div>';
+  }
+  el.innerHTML=h;
+}
+
+/* ══════════════════ Degraded ══════════════════ */
+function snapshotColors(){ return allCases().map(({row,cls})=>({hn:row.hn, name:row.full_name, color:cls.color})); }
+function renderDeg(){
+  const el=document.getElementById('pgDeg');
+  const cur = degScenario; degScenario=null; const base=snapshotColors(); degScenario=cur;
+  const now = snapshotColors();
+  const newGreens = now.filter(n=>n.color==='GREEN' && (base.find(b=>b.hn===n.hn)||{}).color!=='GREEN');
+  const scenarios=[
+    {id:'S1', name:'1 · อ่าน HOSxP ไม่ได้เลย', desc:'สลับไป fallback snapshot (ไฟล์ export ล่วงหน้า — จำลองอายุ 2 วัน) · ข้อมูลแก่ลง ไม่มี field ไหนสดขึ้น'},
+    {id:'S2', name:'2 · อ่านได้แต่ข้อมูลไม่ครบ', desc:'จำลอง HbA1c หายทั้งชุด → ข้อมูลขาด = เหลือง ไม่ใช่เขียว (hard constraint ข้อ 4)'},
+    {id:'S3', name:'3 · อ่านใบสั่งยาไม่ได้', desc:'sig ทุกเคส = UNKNOWN → เหลือง คิวแพทย์ ห้ามเดา (hard constraint ข้อ 7)'},
+    {id:'S4', name:'4 · ระบบเราเองล่ม', desc:'กลับ flow เดิมทันที — พิมพ์ใบงานวันเจาะที่ export ไว้ล่วงหน้า ไม่มีใครค้างคิว'},
+  ];
+  let h='<div class="card"><b>Degraded mode — connector พังแล้วคลินิกยังทำงานต่อได้ไหม</b><br><span class="dim small">หลัก: โหมดพังต้องไม่ทำให้เกณฑ์หลวมลง — ตัววัดคือ "มีเคสกลายเป็นเขียวที่ปกติไม่เขียวหรือไม่"</span></div>';
+  h+='<div class="card">';
+  scenarios.forEach(s=>{
+    h+='<div style="margin:6px 0"><label><input type="radio" name="deg" value="'+s.id+'" '+(degScenario===s.id?'checked':'')+' onchange="setDeg(this.value)"> <b>'+s.name+'</b></label> <span class="dim small">— '+s.desc+'</span></div>';
+  });
+  h+='<div style="margin:6px 0"><label><input type="radio" name="deg" value="" '+(!degScenario?'checked':'')+' onchange="setDeg(null)"> <b>ปิดการจำลอง (ระบบปกติ)</b></label></div></div>';
+  if(degScenario==='S4') h+='<div class="card"><button class="primary" onclick="printSheet()">🖨 พิมพ์ใบงานวันเจาะ (paper fallback)</button> <span class="dim small">ใครสั่งกลับ flow เดิม = คำถามเปิดฝั่งบริหาร (program_design.md §7)</span></div>';
+  h+='<div class="card"><b>ผลเทียบก่อน/หลัง</b><table><tr><th>HN</th><th>ปกติ</th><th>โหมดปัจจุบัน</th><th>เปลี่ยน</th></tr>';
+  base.forEach(b=>{
+    const n=now.find(x=>x.hn===b.hn);
+    h+='<tr><td>'+b.hn+' <span class="small dim">'+(b.name||'')+'</span></td><td><span class="chip '+b.color+'">'+colorTh(b.color)+'</span></td><td><span class="chip '+n.color+'">'+colorTh(n.color)+'</span></td><td>'+(b.color!==n.color?'⚠️ '+colorTh(b.color)+' → '+colorTh(n.color):'—')+'</td></tr>';
+  });
+  h+='</table><div style="margin-top:8px">ตัววัดความปลอดภัย: เคสที่กลายเป็นเขียวใหม่ = <span class="'+(newGreens.length?'bad-inv':'ok-inv')+'">'+newGreens.length+' เคส'+(newGreens.length?' — ออกแบบผิด!':' ✓ (ต้องเป็น 0 เสมอ)')+'</span></div></div>';
+  el.innerHTML=h;
+}
+function setDeg(v){ degScenario=v||null; renderAll(); }
+function printSheet(){
+  const items=allCases();
+  let h='<h2>ใบงานวันเจาะ (paper fallback) — พิมพ์เมื่อระบบล่ม</h2><p>วันอ้างอิง: '+refDateStr()+' · ข้อมูลจาก: '+srcInfo.label+' · <b>ตัวเลขเกณฑ์เป็นตัวอย่าง</b></p>';
+  h+='<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>HN / ชื่อ</th><th>งานวันนี้</th><th>คำถามที่ต้องถาม</th><th>หมายเหตุ</th></tr>';
+  items.forEach(({row,cls})=>{
+    const q=questionsFor(row,cls), t=nurseTasks(row,cls);
+    h+='<tr><td><b>'+row.hn+'</b><br>'+(row.full_name||'')+'</td><td>'+t.pending.concat(t.draw).map(x=>'☐ '+x).join('<br>')+'</td><td>'+q.triggered.map(x=>'☐ '+x.short_th).join('<br>')+'</td><td></td></tr>';
+  });
+  h+='</table>';
+  document.getElementById('printSheet').innerHTML=h;
+  window.print();
+}
+
+/* ══════════════════ Admin ══════════════════ */
+function renderAdmin(){
+  const el=document.getElementById('pgAdmin');
+  let h='<div class="card"><b>สถานะกฎและ gate</b> · โปรแกรมคือ interpreter: สลับไฟล์กฎ พฤติกรรมเปลี่ยน โดยไม่แตะโค้ด (rules as data)</div>';
+  const meta=RULES_REAL.meta||{}, rr=RULES_REAL.rules||[];
+  h+='<div class="card"><b>กฎจริง — docs/cpg_rules_config.yaml</b> <span class="dim small">meta.approval_status = '+(meta.approval_status||'?')+' · '+rr.length+' ข้อ</span>';
+  h+='<div class="small" style="margin:6px 0;color:var(--red);font-weight:700">operator_must_see: กฎที่ยัง DO_NOT_EVALUATE ต้องแสดง ห้ามซ่อน — ขณะนี้ '+rr.filter(r=>gateAction(meta,r)!=='EVALUATE').length+' ข้อ</div>';
+  h+='<table><tr><th>id</th><th>family</th><th>ผล</th><th>คิว</th><th>อนุมัติ</th><th>runtime</th><th>pending</th><th>gate</th></tr>';
+  rr.forEach(r=>{
+    h+='<tr><td><b>'+r.id+'</b></td><td>'+(r.family||'')+'</td><td>'+(r.result||'')+'</td><td>'+(r.queue||'—')+'</td><td>'+(r.approval_status||'')+'</td><td>'+(r.runtime_enabled?'เปิด':'ปิด')+'</td><td class="small">'+((r.pending||[]).length?(r.pending||[]).length+' ข้อค้าง':'—')+'</td><td>'+(gateAction(meta,r)==='EVALUATE'?'EVALUATE':'<span style="color:var(--red)">DO_NOT_EVALUATE</span>')+'</td></tr>';
+  });
+  h+='</table></div>';
+  h+='<div class="card"><b>ชุดกฎตัวอย่าง — demo/demo_ruleset.yaml</b> <span class="dim small">'+RULES_DEMO.meta.warning_th+'</span>';
+  h+='<table><tr><th>id</th><th>family</th><th>ผล</th><th>คิว</th><th>เหตุผล (template)</th></tr>';
+  RULES_DEMO.rules.forEach(r=>{ h+='<tr><td><b>'+r.id+'</b></td><td>'+r.family+'</td><td>'+r.result+'</td><td>'+(r.queue||'—')+'</td><td class="small">'+r.reason_th+'</td></tr>'; });
+  h+='</table></div>';
+  // คลังยากลาง — สร้างครั้งเดียวใช้ทุกไซต์ · ไซต์ติ๊กเฉพาะที่มี (D15)
+  if(DA){
+    h+='<div class="card"><b>คลังยากลาง + ความพร้อมของไซต์นี้</b> <span class="dim small">'+DA.formulary.note_th+' · '+DA.note_th+'</span>';
+    h+='<table><tr><th>มีในไซต์นี้</th><th>ยา</th><th>กลุ่ม</th><th>ข้อบ่งใช้</th><th>บันไดขั้นยา (ตัวอย่างกลไก)</th><th>หมายเหตุ</th></tr>';
+    DA.formulary.drugs.forEach(d=>{
+      h+='<tr><td style="text-align:center"><input type="checkbox" '+(siteForm[d.id]?'checked':'')+' onchange="siteForm[\''+d.id+'\']=this.checked;renderAll()"></td>'
+        +'<td><b>'+d.name+'</b></td><td>'+d.class+'</td><td>'+d.indication+'</td>'
+        +'<td class="small">'+d.ladder.join(' → ')+'</td><td class="small dim">'+(d.note_th||'—')+'</td></tr>';
+    });
+    h+='</table><div class="dim small" style="margin-top:6px">ติ๊กออก = advisor จะไม่เสนอยานั้นในไซต์นี้ทันที (ลองติ๊กแล้วดูหน้าแพทย์) · เฟสจริง: ตั้งค่าครั้งเดียวตอน deploy ต่อไซต์ · insulin นอกขอบเขต รอที่ประชุม</div></div>';
+  }
+  h+='<div class="card"><b>Research export</b><div class="sketch">ภาพร่าง — ยังไม่มีความสามารถนี้ · ต้องทบทวน D7 + MOU/DSA ก่อน (export = ข้อมูลออกนอกระบบ) · แยกขาดจาก operational fallback — ดู program_design.md §4</div></div>';
+  el.innerHTML=h;
+}
+
+function renderTopBars(){
+  const mode=document.getElementById('rulesetSel').value;
+  const wb=document.getElementById('warnbar');
+  if(mode==='EXAMPLE') wb.textContent='⚠️ ตัวเลขเกณฑ์และคำแนะนำยาทั้งหมดเป็นตัวอย่าง ไม่ใช่เกณฑ์จริง — รอ med lead ลงนาม · ป้ายนี้ปิดไม่ได้';
+  else wb.textContent='ℹ️ โหมดกฎจริง: ruleset ยังไม่ลงนาม ทุกกฎ DO_NOT_EVALUATE → ทุกเคสใช้ flow เดิม (พฤติกรรมที่ถูกต้องของ gate) · ask-guidance และนโยบายความสดข้อมูลบนหน้าพยาบาลยังมาจากชุดตัวอย่าง (candidate)';
+  const db=document.getElementById('degbar');
+  if(degScenario){
+    const names={S1:'จำลอง: อ่าน HOSxP ไม่ได้ — ใช้ snapshot ไฟล์อายุ 2 วัน',S2:'จำลอง: lab (HbA1c) ไม่เข้าระบบ',S3:'จำลอง: อ่านใบสั่งยาไม่ได้ทั้งชุด',S4:'จำลอง: ระบบล่ม — กลับ flow เดิม + ใบงานกระดาษ'};
+    db.style.display='block'; db.textContent='⚡ DEGRADED MODE · '+names[degScenario];
+  }else db.style.display='none';
+  document.getElementById('srcLabel').textContent='ข้อมูล: '+srcInfo.label+' ('+rawRows.length+' เคส)';
+  document.getElementById('buildInfo').textContent=BUILD_INFO.built_at;
+}
+function renderAll(){
+  ['pgNurse','pgDoc','pgPharm'].forEach(id=>document.getElementById(id).classList.toggle('tbl', layoutMode==='tbl'));
+  renderTopBars(); renderNurse(); renderDoc(); renderPharm(); renderIT(); renderDeg(); renderAdmin();
+}
+
+/* ══════════════════ wiring ══════════════════ */
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById(t.dataset.page).classList.add('active');
+  document.body.classList.toggle('sysview', ['pgIT','pgDeg','pgAdmin'].includes(t.dataset.page));
+}));
+document.getElementById('rulesetSel').addEventListener('change',renderAll);
+document.getElementById('layoutSel').addEventListener('change',e=>{layoutMode=e.target.value;renderAll();});
+document.getElementById('searchBox').addEventListener('input',e=>{
+  searchQ=e.target.value.trim();
+  document.getElementById('btnClearSearch').style.display=searchQ?'':'none';
+  renderAll();
+});
+document.getElementById('btnClearSearch').addEventListener('click',clearSearch);
+document.getElementById('refDate').addEventListener('change',renderAll);
+document.getElementById('btnSample').addEventListener('click',()=>ingest(SAMPLE_CSV,',','ข้อมูลตัวอย่าง (แต่งขึ้น ไม่ใช่ผู้ป่วยจริง)','ไฟล์ CSV'));
+document.getElementById('btnFile').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>ingest(rd.result,',','ไฟล์: '+f.name,'ไฟล์ CSV');
+  rd.readAsText(f,'utf-8');
+});
+document.getElementById('btnPaste').addEventListener('click',()=>document.getElementById('pasteDlg').style.display='block');
+document.getElementById('btnPasteOk').addEventListener('click',()=>{
+  document.getElementById('pasteDlg').style.display='none';
+  ingest(document.getElementById('pasteBox').value,'\t','วางจาก Excel (clipboard)','ตารางวาง');
+});
+
+document.getElementById('refDate').value = BUILD_INFO.default_ref_date;
+ingest(SAMPLE_CSV, ',', 'ข้อมูลตัวอย่าง (แต่งขึ้น ไม่ใช่ผู้ป่วยจริง)', 'ไฟล์ CSV');
+</script>
+</body>
+</html>
